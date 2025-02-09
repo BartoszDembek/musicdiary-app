@@ -11,13 +11,60 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Link } from '@react-navigation/native';
+import Header from '../components/Auth/Header';
+import { authService } from '../services/authService';
+import { Alert } from 'react-native';
+
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('Login attempt:', email, password);
+  const handleLogin = async () => {
+    if (!email.trim()) {
+      Alert.alert(
+        "Błąd",
+        "Pole email jest wymagane",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    if (!password.trim()) {
+      Alert.alert(
+        "Błąd",
+        "Pole hasło jest wymagane",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Prosta walidacja formatu email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        "Błąd",
+        "Wprowadź poprawny adres email",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Jeśli wszystkie walidacje przeszły, kontynuuj logowanie
+    const userData = {
+      email,
+      password,
+    };
+    
+    try {
+      await authService.login(userData);
+    } catch (error) {
+      Alert.alert(
+        "Błąd",
+        "Wystąpił problem podczas logowania. Spróbuj ponownie.",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   return (
@@ -29,8 +76,7 @@ const LoginScreen = () => {
         style={styles.keyboardAvoidingView}
       >
         <View style={styles.innerContainer}>
-          <Text style={styles.logo}>MusicDiary</Text>
-          <Text style={styles.subtitle}>Twój osobisty dziennik muzyczny</Text>
+          <Header subtitle="Twój osobisty dziennik muzyczny" />
           
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
@@ -94,19 +140,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-  },
-  logo: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#BB9AF7', // Fioletowy akcent
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7AA2F7', // Jasny niebieski
-    marginBottom: 40,
-    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,

@@ -11,15 +11,91 @@ import {
   ScrollView,
 } from 'react-native';
 import { Link } from '@react-navigation/native';
-
-const RegisterScreen = () => {
+import { authService } from '../services/authService';
+import Header from '../components/Auth/Header';
+import { Alert } from 'react-native';
+import {
+  useNavigation,
+} from '@react-navigation/native';
+const RegisterScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleRegister = () => {
-    console.log('Register attempt:', { username, email, password, confirmPassword });
+  const handleRegister = async () => {
+    if (!username.trim()) {
+      Alert.alert(
+        "Błąd",
+        "Pole nazwa użytkownika jest wymagane",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+      if (!email.trim()) {
+        Alert.alert(
+          "Błąd",
+          "Pole email jest wymagane",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+  
+      if (!password.trim()) {
+        Alert.alert(
+          "Błąd",
+          "Pole hasło jest wymagane",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+      if (password.trim().length < 8) {
+        Alert.alert(
+          "Błąd",
+          "Hasło ma mniej niż 8",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      if (password != confirmPassword) {
+        Alert.alert(
+          "Błąd",
+          "Hasła musze być takie same",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+  
+      // Prosta walidacja formatu email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert(
+          "Błąd",
+          "Wprowadź poprawny adres email",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+  
+      // Jeśli wszystkie walidacje przeszły, kontynuuj logowanie
+      const userData = {
+        email,
+        username,
+        password,
+      };
+      
+      try {
+        await authService.register(userData);
+        navigation.navigate('EmailVerification');
+      } catch (error) {
+        console.log(error)
+        Alert.alert(
+          "Błąd",
+          "Wystąpił problem podczas rejestracji. Spróbuj ponownie.",
+          [{ text: "OK" }]
+        );
+      }
   };
 
   return (
@@ -30,8 +106,7 @@ const RegisterScreen = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.innerContainer}>
-            <Text style={styles.logo}>MusicDiary</Text>
-            <Text style={styles.subtitle}>Dołącz do społeczności melomanów</Text>
+            <Header subtitle="Dołącz do społeczności melomanów" />
             
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Nazwa użytkownika</Text>
@@ -124,19 +199,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
     justifyContent: 'center',
-  },
-  logo: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: '#BB9AF7',
-    marginBottom: 8,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#7AA2F7',
-    marginBottom: 40,
-    textAlign: 'center',
   },
   inputContainer: {
     marginBottom: 20,
