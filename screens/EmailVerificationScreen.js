@@ -18,11 +18,6 @@ const EmailVerificationScreen = () => {
     try {
       const response = await authService.checkEmailVerification();
       setIsVerified(response.isVerified);
-      
-      if (response.isVerified) {
-        // Przekierowanie do głównej aplikacji po weryfikacji
-        navigation.replace('MainApp');
-      }
     } catch (error) {
       Alert.alert(
         "Błąd",
