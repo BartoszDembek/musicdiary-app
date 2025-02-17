@@ -2,12 +2,13 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet } from 'react-native';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
-import { NavigationContainer } from '@react-navigation/native'
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import EmailVerificationScreen from './screens/EmailVerificationScreen'
+import EmailVerificationScreen from './screens/EmailVerificationScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MainScreen from './screens/MainScreen';
+import AlbumScreen from './screens/AlbumScreen'; // Import AlbumScreen
 import { Ionicons } from '@expo/vector-icons'; // Import icons from React Icons
 
 const Stack = createNativeStackNavigator();
@@ -50,6 +51,7 @@ export default function App() {
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Register" component={RegisterScreen} />
             <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+            <Stack.Screen name="Album" component={AlbumScreen} />
           </Stack.Navigator>
         </NavigationContainer>
       </SafeAreaView>
