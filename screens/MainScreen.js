@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ScrollView, Image, Alert, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { spotifyService } from '../services/spotifyService';
 
 const MainScreen = () => {
   const [albums, setAlbums] = useState([]);
+  const navigation = useNavigation();
   
   const loadAlbums = async () => {
     try {
       const response = await spotifyService.loadAlbums();
       let img = [];
       response['albums']['items'].forEach(element => {
-        img.push(element['images'][0]["url"]);
+        img.push({ id: element['id'], url: element['images'][0]["url"] });
       });
       setAlbums(img);
     } catch (error) {
@@ -20,6 +22,10 @@ const MainScreen = () => {
         [{ text: "OK" }]
       );
     }
+  };
+
+  const onPressAlbum = (id) => {
+    navigation.navigate('Album', { albumId: id });
   };
 
   useEffect(() => {
@@ -35,7 +41,9 @@ const MainScreen = () => {
       <ScrollView style={styles.content}>
         <View style={styles.albumContainer}>
           {albums.map((album, index) => (
-            <Image key={index} source={{ uri: album }} style={styles.albumImage} />
+            <Pressable key={index} onPress={() => onPressAlbum(album.id)}>
+              <Image source={{ uri: album.url }} style={styles.albumImage} />
+            </Pressable>
           ))}
         </View>
       </ScrollView>

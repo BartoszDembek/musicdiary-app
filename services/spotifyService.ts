@@ -1,7 +1,5 @@
 import axios from 'axios';
-const API_URL = __DEV__ 
-  ? 'http://192.168.0.2:3001'  // Zamień x.x na IP z Expo Dev Tools
-  : 'https://twoj-produkcyjny-url.com';
+const API_URL = 'https://musicdiary-backend-puce.vercel.app'
 export const spotifyService = {
     loadAlbums: async () => {
       try {
@@ -9,7 +7,21 @@ export const spotifyService = {
         return response.data;
       } catch (error) {
         if (error.response) {
-          throw new Error(error.response.data.message || 'Błąd rejestracji');
+          throw new Error(error.response.data.message || 'Błąd pobrania albumów');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
+    },
+    getAlbumByID: async (id) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/album/${id}`);
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd pobrania albumu');
         } else if (error.request) {
           throw new Error('Brak odpowiedzi od serwera');
         } else {

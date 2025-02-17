@@ -1,7 +1,6 @@
 import axios from 'axios';
-const API_URL = __DEV__ 
-  ? 'http://192.168.0.2:3001'  // Zamień x.x na IP z Expo Dev Tools
-  : 'https://twoj-produkcyjny-url.com';
+const API_URL = 'https://musicdiary-backend-puce.vercel.app'
+
 export const authService = {
     register: async (userData) => {
       try {
