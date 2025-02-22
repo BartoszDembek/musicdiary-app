@@ -43,4 +43,32 @@ export const spotifyService = {
         }
       }
     },
+    getArtistAlbums: async (id) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/artist/${id}/albums`);
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd pobrania albumów artysty');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
+    },
+    getArtistTopTracks: async (id) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/artist/${id}/top-tracks`);
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd pobrania utworów artysty');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
+    }
 };
