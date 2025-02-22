@@ -28,5 +28,19 @@ export const spotifyService = {
           throw new Error('Błąd podczas wysyłania żądania');
         }
       }
-    }
+    },
+    getArtistByID: async (id) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/artist/${id}`);
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd pobrania artysty');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
+    },
 };
