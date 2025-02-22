@@ -1,25 +1,34 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, Pressable } from 'react-native';
+import { View, SafeAreaView, Image, Alert, ScrollView, Pressable, Text, StyleSheet } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { spotifyService } from '../services/spotifyService';
+import ArtistStats from '../components/artist/ArtistStats';
+import ArtistGenres from '../components/artist/ArtistGenres';
+import TopTracks from '../components/artist/TopTracks';
+import ArtistAlbums from '../components/artist/ArtistAlbums';
 
 const ArtistScreen = ({ route }) => {
   const { artistId } = route.params;
   const [artist, setArtist] = useState(null);
+  const [albums, setAlbums] = useState([]);
+  const [topTracks, setTopTracks] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
-  const loadArtist = async () => {
+  const loadArtistData = async () => {
     try {
-      const response = await spotifyService.getArtistByID(artistId);
-      setArtist(response);
+      const [artistData, albumsData, tracksData] = await Promise.all([
+        spotifyService.getArtistByID(artistId),
+        spotifyService.getArtistAlbums(artistId),
+        spotifyService.getArtistTopTracks(artistId),
+      ]);
+
+      setArtist(artistData);
+      setAlbums(albumsData.items);
+      setTopTracks(tracksData.tracks);
     } catch (error) {
-      Alert.alert(
-        "Błąd",
-        "Nie udało się załadować artysty",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Error", "Failed to load artist data");
     } finally {
       setLoading(false);
     }
@@ -28,7 +37,7 @@ const ArtistScreen = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
-      loadArtist();
+      loadArtistData();
     }, [artistId])
   );
 
@@ -54,39 +63,15 @@ const ArtistScreen = ({ route }) => {
           </Pressable>
         </View>
 
-        <Image 
-          source={{ uri: artist.images[0]?.url }} 
-          style={styles.artistImage}
-        />
+        <Image source={{ uri: artist.images[0]?.url }} style={styles.artistImage} />
         
         <View style={styles.artistInfo}>
           <Text style={styles.artistName}>{artist.name}</Text>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="people" size={20} color="#BB9AF7" />
-              <Text style={styles.statValue}>{artist.followers.total.toLocaleString()}</Text>
-              <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="star" size={20} color="#BB9AF7" />
-              <Text style={styles.statValue}>{artist.popularity}%</Text>
-              <Text style={styles.statLabel}>Popularity</Text>
-            </View>
-          </View>
-
-          {artist.genres.length > 0 && (
-            <View style={styles.genresSection}>
-              <Text style={styles.sectionTitle}>Genres</Text>
-              <View style={styles.genresList}>
-                {artist.genres.map((genre, index) => (
-                  <View key={index} style={styles.genreTag}>
-                    <Text style={styles.genreText}>{genre}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          )}
+          
+          <ArtistStats followers={artist.followers.total} popularity={artist.popularity} />
+          <ArtistGenres genres={artist.genres} />
+          <TopTracks tracks={topTracks} />
+          <ArtistAlbums albums={albums} />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -125,53 +110,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#BB9AF7',
     marginBottom: 20,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 20,
-    marginBottom: 30,
-    borderRadius: 15,
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#BB9AF7',
-    marginTop: 8,
-  },
-  statLabel: {
-    fontSize: 16,
-    color: '#C0CAF5',
-    marginTop: 5,
-  },
-  genresSection: {
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    color: '#BB9AF7',
-    marginBottom: 15,
-    fontWeight: '600',
-  },
-  genresList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: 10,
-  },
-  genreTag: {
-    backgroundColor: '#414868',
-    borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    margin: 4,
-  },
-  genreText: {
-    color: '#C0CAF5',
-    fontSize: 14,
   },
   skeletonHeader: {
     width: '100%',
