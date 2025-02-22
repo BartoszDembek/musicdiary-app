@@ -135,6 +135,7 @@ const LoginScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1E1E2E',
   },
   keyboardAvoidingView: {
     flex: 1,
