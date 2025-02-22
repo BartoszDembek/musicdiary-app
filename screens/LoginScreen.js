@@ -14,11 +14,12 @@ import { Link } from '@react-navigation/native';
 import Header from '../components/Auth/Header';
 import { authService } from '../services/authService';
 import { Alert } from 'react-native';
-
+import { useAuth } from '../context/AuthContext';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { signIn } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim()) {
@@ -57,7 +58,9 @@ const LoginScreen = () => {
     };
     
     try {
-      await authService.login(userData);
+      const response = await authService.login(userData);
+      // Assuming authService.login returns a token
+      await signIn(response.token);
     } catch (error) {
       Alert.alert(
         "Błąd",

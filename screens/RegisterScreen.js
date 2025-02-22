@@ -17,11 +17,14 @@ import { Alert } from 'react-native';
 import {
   useNavigation,
 } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
+
 const RegisterScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { signIn } = useAuth();
 
   const handleRegister = async () => {
     if (!username.trim()) {
@@ -78,7 +81,7 @@ const RegisterScreen = ({navigation}) => {
         return;
       }
   
-      // Jeśli wszystkie walidacje przeszły, kontynuuj logowanie
+      // Jeśli wszystkie walidacje przeszły, kontynuuj rejestrację
       const userData = {
         email,
         username,
@@ -86,8 +89,15 @@ const RegisterScreen = ({navigation}) => {
       };
       
       try {
-        await authService.register(userData);
-        navigation.navigate('EmailVerification');
+        const registerResponse = await authService.register(userData);
+        // Po udanej rejestracji, zaloguj użytkownika
+        const loginResponse = await authService.login({
+          email,
+          password,
+        });
+        // Zapisz token i przejdź do głównej aplikacji
+        await signIn(loginResponse.token);
+        // Nie nawigujemy do EmailVerification, bo użytkownik jest już zalogowany
       } catch (error) {
         console.log(error)
         Alert.alert(

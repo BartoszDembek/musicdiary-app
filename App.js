@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ActivityIndicator, View } from 'react-native';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,6 +11,8 @@ import MainScreen from './screens/MainScreen';
 import AlbumScreen from './screens/AlbumScreen';
 import ArtistScreen from './screens/ArtistScreen';
 import { Ionicons } from '@expo/vector-icons';
+import ProfileScreen from './screens/ProfileScreen';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -41,8 +43,38 @@ function TabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
-      <Tab.Screen name="Profile" component={RegisterScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
+  );
+}
+
+function Navigation() {
+  const { isLoading, userToken } = useAuth();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#BB9AF7" />
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {userToken ? (
+          // Authenticated stack
+          <Stack.Screen name="MainTabs" component={TabNavigator} />
+        ) : (
+          // Non-authenticated stack
+          <>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Register" component={RegisterScreen} />
+            <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -50,13 +82,9 @@ export default function App() {
   return (
     <SafeAreaProvider style={styles.container}>
       <StatusBar style="light" backgroundColor="#1E1E2E" />
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="EmailVerification" component={EmailVerificationScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
+      <AuthProvider>
+        <Navigation />
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
@@ -64,6 +92,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#1E1E2E',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#1E1E2E',
   },
   screen: {
