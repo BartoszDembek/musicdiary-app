@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, TouchableOpacity, Pressable } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
 
 const AlbumScreen = ({ route }) => {
@@ -22,6 +23,12 @@ const AlbumScreen = ({ route }) => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openInSpotify = () => {
+    if (album?.external_urls?.spotify) {
+      Linking.openURL(album.external_urls.spotify);
     }
   };
 
@@ -49,9 +56,14 @@ const AlbumScreen = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
-          </Pressable>
+          <View style={styles.headerButtons}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
+              <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+            </Pressable>
+            <Pressable onPress={openInSpotify} style={styles.iconButton}>
+              <Entypo name="spotify" size={24} color="#1DB954" />
+            </Pressable>
+          </View>
         </View>
 
         <Image source={{ uri: album.images[0].url }} style={styles.albumImage} />
@@ -115,7 +127,13 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
   },
-  backButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',

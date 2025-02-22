@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, SafeAreaView, Image, Alert, ScrollView, Pressable, Text, StyleSheet } from 'react-native';
+import { View, SafeAreaView, Image, Alert, ScrollView, Pressable, Text, StyleSheet, Linking } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
 import ArtistStats from '../components/artist/ArtistStats';
 import ArtistGenres from '../components/artist/ArtistGenres';
@@ -34,6 +35,12 @@ const ArtistScreen = ({ route }) => {
     }
   };
 
+  const openInSpotify = () => {
+    if (artist?.external_urls?.spotify) {
+      Linking.openURL(artist.external_urls.spotify);
+    }
+  };
+
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
@@ -58,9 +65,14 @@ const ArtistScreen = ({ route }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
-          </Pressable>
+          <View style={styles.headerButtons}>
+            <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
+              <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+            </Pressable>
+            <Pressable onPress={openInSpotify} style={styles.iconButton}>
+              <Entypo name="spotify" size={24} color="#1DB954" />
+            </Pressable>
+          </View>
         </View>
 
         <Image source={{ uri: artist.images[0]?.url }} style={styles.artistImage} />
@@ -89,7 +101,13 @@ const styles = StyleSheet.create({
   header: {
     padding: 20,
   },
-  backButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  iconButton: {
     width: 40,
     height: 40,
     justifyContent: 'center',
