@@ -5,10 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spotifyService } from '../services/spotifyService';
 import RenderAlbumCard from '../components/RenderAlbumCard';
+import SearchModal from '../components/SearchModal';
 
 const MainScreen = () => {
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   
@@ -45,10 +47,15 @@ const MainScreen = () => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>MusicDiary</Text>
-        <Pressable onPress={() => {}} style={styles.searchButton}>
+        <Pressable onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
           <Ionicons name="search" size={24} color="#BB9AF7" />
         </Pressable>
       </View>
+
+      <SearchModal 
+        visible={isSearchVisible}
+        onClose={() => setIsSearchVisible(false)}
+      />
 
       <ScrollView 
         style={styles.content}
