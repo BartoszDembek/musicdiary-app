@@ -70,5 +70,21 @@ export const spotifyService = {
           throw new Error('Błąd podczas wysyłania żądania');
         }
       }
+    },
+    search: async (query) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/search`, {
+          params: {query:query},
+        });
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd wyszukiwania');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
     }
 };
