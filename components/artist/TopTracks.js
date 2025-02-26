@@ -1,21 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const TopTracks = ({ tracks }) => {
+  const navigation = useNavigation();
+
   if (!tracks || tracks.length === 0) return null;
 
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Top Tracks</Text>
       {tracks.slice(0, 5).map((track, index) => (
-        <View key={index} style={styles.trackItem}>
+        <Pressable
+          key={index}
+          style={styles.trackItem}
+          onPress={() => navigation.navigate('Track', { trackId: track.id })}
+        >
           <Text style={styles.trackNumber}>{index + 1}</Text>
           <Image source={{ uri: track.album.images[0].url }} style={styles.trackImage} />
           <View style={styles.trackInfo}>
             <Text style={styles.trackName}>{track.name}</Text>
             <Text style={styles.trackAlbum}>{track.album.name}</Text>
           </View>
-        </View>
+        </Pressable>
       ))}
     </View>
   );

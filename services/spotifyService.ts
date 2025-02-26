@@ -86,5 +86,19 @@ export const spotifyService = {
           throw new Error('Błąd podczas wysyłania żądania');
         }
       }
+    },
+    getTrackByID: async (id) => {
+      try {
+        const response = await axios.get(`${API_URL}/spotify/track/${id}`);
+        return response.data;
+      } catch (error) {
+        if (error.response) {
+          throw new Error(error.response.data.message || 'Błąd pobrania utworu');
+        } else if (error.request) {
+          throw new Error('Brak odpowiedzi od serwera');
+        } else {
+          throw new Error('Błąd podczas wysyłania żądania');
+        }
+      }
     }
 };

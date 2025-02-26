@@ -13,6 +13,7 @@ import ArtistScreen from './screens/ArtistScreen';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileScreen from './screens/ProfileScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import TrackScreen from './screens/TrackScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -24,6 +25,7 @@ function HomeStack() {
       <Stack.Screen name="MainScreen" component={MainScreen} />
       <Stack.Screen name="Album" component={AlbumScreen} />
       <Stack.Screen name="Artist" component={ArtistScreen} />
+      <Stack.Screen name="Track" component={TrackScreen} />
     </Stack.Navigator>
   );
 }
