@@ -24,8 +24,8 @@ const LoginScreen = () => {
   const handleLogin = async () => {
     if (!email.trim()) {
       Alert.alert(
-        "Błąd",
-        "Pole email jest wymagane",
+        "Error",
+        "Email field is required",
         [{ text: "OK" }]
       );
       return;
@@ -33,19 +33,19 @@ const LoginScreen = () => {
 
     if (!password.trim()) {
       Alert.alert(
-        "Błąd",
-        "Pole hasło jest wymagane",
+        "Error",
+        "Password field is required",
         [{ text: "OK" }]
       );
       return;
     }
 
-    // Prosta walidacja formatu email
+    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert(
-        "Błąd",
-        "Wprowadź poprawny adres email",
+        "Error",
+        "Please enter a valid email address",
         [{ text: "OK" }]
       );
       return;
@@ -59,12 +59,12 @@ const LoginScreen = () => {
     
     try {
       const response = await authService.login(userData);
-      // Assuming authService.login returns a token
-      await signIn(response.token);
+      // Now passing both token and user data to signIn
+      await signIn(response.token, response.user);
     } catch (error) {
       Alert.alert(
-        "Błąd",
-        "Wystąpił problem podczas logowania. Spróbuj ponownie.",
+        "Error",
+        "Login failed. Please try again.",
         [{ text: "OK" }]
       );
     }
@@ -79,13 +79,13 @@ const LoginScreen = () => {
         style={styles.keyboardAvoidingView}
       >
         <View style={styles.innerContainer}>
-          <Header subtitle="Twój osobisty dziennik muzyczny" />
+          <Header subtitle="Your Personal Music Journal" />
           
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Email</Text>
             <TextInput
               style={styles.input}
-              placeholder="Wprowadź email"
+              placeholder="Enter your email"
               placeholderTextColor="rgba(255, 255, 255, 0.5)"
               value={email}
               onChangeText={setEmail}
@@ -95,10 +95,10 @@ const LoginScreen = () => {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Hasło</Text>
+            <Text style={styles.label}>Password</Text>
             <TextInput
               style={styles.input}
-              placeholder="Wprowadź hasło"
+              placeholder="Enter your password"
               placeholderTextColor="rgba(255, 255, 255, 0.5)"
               value={password}
               onChangeText={setPassword}
@@ -110,19 +110,19 @@ const LoginScreen = () => {
             style={styles.forgotPassword}
             onPress={() => console.log('Forgot password')}
           >
-            <Text style={styles.forgotPasswordText}>Zapomniałeś hasła?</Text>
+            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.loginButton}
             onPress={handleLogin}
           >
-            <Text style={styles.loginButtonText}>Zaloguj się</Text>
+            <Text style={styles.loginButtonText}>Sign In</Text>
           </TouchableOpacity>
 
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Nie masz jeszcze konta? </Text>
-            <Link screen="Register" style={styles.registerLink}>Zarejestruj się</Link>
+            <Text style={styles.registerText}>Don't have an account? </Text>
+            <Link screen="Register" style={styles.registerLink}>Sign Up</Link>
           </View>
         </View>
       </KeyboardAvoidingView>

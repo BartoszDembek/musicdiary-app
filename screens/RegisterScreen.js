@@ -29,83 +29,80 @@ const RegisterScreen = ({navigation}) => {
   const handleRegister = async () => {
     if (!username.trim()) {
       Alert.alert(
-        "Błąd",
-        "Pole nazwa użytkownika jest wymagane",
+        "Error",
+        "Username field is required",
         [{ text: "OK" }]
       );
       return;
     }
-      if (!email.trim()) {
-        Alert.alert(
-          "Błąd",
-          "Pole email jest wymagane",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-  
-      if (!password.trim()) {
-        Alert.alert(
-          "Błąd",
-          "Pole hasło jest wymagane",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-      if (password.trim().length < 8) {
-        Alert.alert(
-          "Błąd",
-          "Hasło ma mniej niż 8",
-          [{ text: "OK" }]
-        );
-        return;
-      }
+    if (!email.trim()) {
+      Alert.alert(
+        "Error",
+        "Email field is required",
+        [{ text: "OK" }]
+      );
+      return;
+    }
 
-      if (password != confirmPassword) {
-        Alert.alert(
-          "Błąd",
-          "Hasła musze być takie same",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-  
-      // Prosta walidacja formatu email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        Alert.alert(
-          "Błąd",
-          "Wprowadź poprawny adres email",
-          [{ text: "OK" }]
-        );
-        return;
-      }
-  
-      // Jeśli wszystkie walidacje przeszły, kontynuuj rejestrację
-      const userData = {
+    if (!password.trim()) {
+      Alert.alert(
+        "Error",
+        "Password field is required",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+    if (password.trim().length < 8) {
+      Alert.alert(
+        "Error",
+        "Password must be at least 8 characters",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    if (password != confirmPassword) {
+      Alert.alert(
+        "Error",
+        "Passwords must match",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert(
+        "Error",
+        "Please enter a valid email address",
+        [{ text: "OK" }]
+      );
+      return;
+    }
+
+    // Jeśli wszystkie walidacje przeszły, kontynuuj rejestrację
+    const userData = {
+      email,
+      username,
+      password,
+    };
+    
+    try {
+      const registerResponse = await authService.register(userData);
+      const loginResponse = await authService.login({
         email,
-        username,
         password,
-      };
-      
-      try {
-        const registerResponse = await authService.register(userData);
-        // Po udanej rejestracji, zaloguj użytkownika
-        const loginResponse = await authService.login({
-          email,
-          password,
-        });
-        // Zapisz token i przejdź do głównej aplikacji
-        await signIn(loginResponse.token);
-        // Nie nawigujemy do EmailVerification, bo użytkownik jest już zalogowany
-      } catch (error) {
-        console.log(error)
-        Alert.alert(
-          "Błąd",
-          "Wystąpił problem podczas rejestracji. Spróbuj ponownie.",
-          [{ text: "OK" }]
-        );
-      }
+      });
+      await signIn(loginResponse.token, loginResponse.user);
+    } catch (error) {
+      console.log(error)
+      Alert.alert(
+        "Error",
+        "Registration failed. Please try again.",
+        [{ text: "OK" }]
+      );
+    }
   };
 
   return (
@@ -116,13 +113,13 @@ const RegisterScreen = ({navigation}) => {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.innerContainer}>
-            <Header subtitle="Dołącz do społeczności melomanów" />
+            <Header subtitle="Join the Music Lovers Community" />
             
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Nazwa użytkownika</Text>
+              <Text style={styles.label}>Username</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Wybierz nazwę użytkownika"
+                placeholder="Choose a username"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 value={username}
                 onChangeText={setUsername}
@@ -134,7 +131,7 @@ const RegisterScreen = ({navigation}) => {
               <Text style={styles.label}>Email</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Wprowadź email"
+                placeholder="Enter your email"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 value={email}
                 onChangeText={setEmail}
@@ -144,10 +141,10 @@ const RegisterScreen = ({navigation}) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Hasło</Text>
+              <Text style={styles.label}>Password</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Minimum 8 znaków"
+                placeholder="Minimum 8 characters"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 value={password}
                 onChangeText={setPassword}
@@ -156,10 +153,10 @@ const RegisterScreen = ({navigation}) => {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Potwierdź hasło</Text>
+              <Text style={styles.label}>Confirm Password</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Powtórz hasło"
+                placeholder="Repeat your password"
                 placeholderTextColor="rgba(255, 255, 255, 0.5)"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -169,10 +166,10 @@ const RegisterScreen = ({navigation}) => {
 
             <View style={styles.termsContainer}>
               <Text style={styles.termsText}>
-                Rejestrując się, akceptujesz nasze{' '}
-                <Text style={styles.termsLink}>Warunki użytkowania</Text>
-                {' '}oraz{' '}
-                <Text style={styles.termsLink}>Politykę prywatności</Text>
+                By signing up, you agree to our{' '}
+                <Text style={styles.termsLink}>Terms of Service</Text>
+                {' '}and{' '}
+                <Text style={styles.termsLink}>Privacy Policy</Text>
               </Text>
             </View>
 
@@ -180,12 +177,12 @@ const RegisterScreen = ({navigation}) => {
               style={styles.registerButton}
               onPress={handleRegister}
             >
-              <Text style={styles.registerButtonText}>Utwórz konto</Text>
+              <Text style={styles.registerButtonText}>Create Account</Text>
             </TouchableOpacity>
 
             <View style={styles.loginContainer}>
-              <Text style={styles.loginText}>Masz już konto? </Text>
-              <Link screen="Login" style={styles.loginLink}>Zaloguj się</Link>
+              <Text style={styles.loginText}>Already have an account? </Text>
+              <Link screen="Login" style={styles.loginLink}>Sign In</Link>
               
             </View>
           </View>

@@ -1,27 +1,50 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
 
 const mockUserData = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  joinDate: "Dołączono: Styczeń 2024",
   stats: {
     albumsReviewed: 42,
     artistsFollowed: 15,
     favoriteTracks: 128
   },
   recentActivity: [
-    { type: 'review', album: 'Random Access Memories', artist: 'Daft Punk', date: '2 dni temu' },
-    { type: 'follow', artist: 'The Weeknd', date: '5 dni temu' },
-    { type: 'review', album: 'Dawn FM', artist: 'The Weeknd', date: 'tydzień temu' },
+    { type: 'review', album: 'Random Access Memories', artist: 'Daft Punk', date: '2 days ago' },
+    { type: 'follow', artist: 'The Weeknd', date: '5 days ago' },
+    { type: 'review', album: 'Dawn FM', artist: 'The Weeknd', date: 'a week ago' },
   ]
 };
 
 const ProfileScreen = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-  const { signOut } = useAuth();
+  const [userProfile, setUserProfile] = useState(null);
+  const { signOut, user } = useAuth();
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const profile = await userService.getUserProfile(user.id);
+        setUserProfile(profile[0]); // Assuming the first item in the array is the user profile
+      } catch (error) {
+        console.error('Error fetching user profile:', error.message);
+      }
+    };
+
+    fetchUserProfile();
+  }, [user?.id]);
+
+  const formatJoinDate = (dateString) => {
+    const date = new Date(dateString);
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `Joined: ${months[date.getMonth()]} ${date.getFullYear()}`;
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -33,7 +56,7 @@ const ProfileScreen = () => {
       <ScrollView style={styles.scrollView}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profil</Text>
+          <Text style={styles.headerTitle}>Profile</Text>
           <Pressable 
             style={styles.settingsButton}
             onPress={() => setIsSettingsVisible(true)}
@@ -52,7 +75,7 @@ const ProfileScreen = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
-                <Text style={styles.modalTitle}>Ustawienia</Text>
+                <Text style={styles.modalTitle}>Settings</Text>
                 <Pressable 
                   onPress={() => setIsSettingsVisible(false)}
                   style={styles.closeButton}
@@ -66,7 +89,7 @@ const ProfileScreen = () => {
                 onPress={handleLogout}
               >
                 <Ionicons name="log-out-outline" size={24} color="#F7768E" />
-                <Text style={styles.logoutText}>Wyloguj się</Text>
+                <Text style={styles.logoutText}>Sign Out</Text>
               </Pressable>
             </View>
           </View>
@@ -75,32 +98,43 @@ const ProfileScreen = () => {
         {/* User Info */}
         <View style={styles.userInfoContainer}>
           <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>{mockUserData.name[0]}</Text>
+            {userProfile?.avatar && userProfile.avatar !== "NULL" ? (
+              <Image 
+                source={{ uri: userProfile.avatar }} 
+                style={styles.avatarImage}
+              />
+            ) : (
+              <Text style={styles.avatarText}>
+                {userProfile?.username?.[0]?.toUpperCase() || '?'}
+              </Text>
+            )}
           </View>
-          <Text style={styles.userName}>{mockUserData.name}</Text>
-          <Text style={styles.userEmail}>{mockUserData.email}</Text>
-          <Text style={styles.joinDate}>{mockUserData.joinDate}</Text>
+          <Text style={styles.userName}>{userProfile?.username || 'Loading...'}</Text>
+          <Text style={styles.userEmail}>{userProfile?.email || 'Loading...'}</Text>
+          <Text style={styles.joinDate}>
+            {userProfile?.created_at ? formatJoinDate(userProfile.created_at) : 'Loading...'}
+          </Text>
         </View>
 
-        {/* Stats */}
+        {/* Stats - using mockUserData */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{mockUserData.stats.albumsReviewed}</Text>
-            <Text style={styles.statLabel}>Recenzje</Text>
+            <Text style={styles.statLabel}>Reviews</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{mockUserData.stats.artistsFollowed}</Text>
-            <Text style={styles.statLabel}>Obserwowani</Text>
+            <Text style={styles.statLabel}>Following</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{mockUserData.stats.favoriteTracks}</Text>
-            <Text style={styles.statLabel}>Ulubione</Text>
+            <Text style={styles.statLabel}>Favorites</Text>
           </View>
         </View>
 
-        {/* Recent Activity */}
+        {/* Recent Activity - using mockUserData */}
         <View style={styles.activityContainer}>
-          <Text style={styles.sectionTitle}>Ostatnia aktywność</Text>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
           {mockUserData.recentActivity.map((activity, index) => (
             <View key={index} style={styles.activityItem}>
               <Ionicons 
@@ -110,7 +144,7 @@ const ProfileScreen = () => {
               />
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>
-                  {activity.type === 'review' ? `Zrecenzowano ${activity.album}` : `Obserwujesz ${activity.artist}`}
+                  {activity.type === 'review' ? `Reviewed ${activity.album}` : `Following ${activity.artist}`}
                 </Text>
                 <Text style={styles.activityDate}>{activity.date}</Text>
               </View>
@@ -163,6 +197,11 @@ const styles = StyleSheet.create({
     fontSize: 40,
     color: '#BB9AF7',
     fontWeight: 'bold',
+  },
+  avatarImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   userName: {
     fontSize: 24,

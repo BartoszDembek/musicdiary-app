@@ -6,6 +6,7 @@ const AuthContext = createContext({});
 export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState(null);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     checkAuthStatus();
@@ -14,6 +15,10 @@ export const AuthProvider = ({ children }) => {
   const checkAuthStatus = async () => {
     try {
       const token = await AsyncStorage.getItem('userToken');
+      const userData = await AsyncStorage.getItem('userData');
+      if (userData) {
+        setUser(JSON.parse(userData));
+      }
       setUserToken(token);
     } catch (error) {
       console.error('Failed to get auth status:', error);
@@ -22,21 +27,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signIn = async (token) => {
+  const signIn = async (token, userData) => {
     try {
       await AsyncStorage.setItem('userToken', token);
+      await AsyncStorage.setItem('userData', JSON.stringify(userData));
       setUserToken(token);
+      setUser(userData);
     } catch (error) {
-      console.error('Error storing auth token:', error);
+      console.error('Error storing auth data:', error);
     }
   };
 
   const signOut = async () => {
     try {
       await AsyncStorage.removeItem('userToken');
+      await AsyncStorage.removeItem('userData');
       setUserToken(null);
+      setUser(null);
     } catch (error) {
-      console.error('Error removing auth token:', error);
+      console.error('Error removing auth data:', error);
     }
   };
 
@@ -44,6 +53,7 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{
       isLoading,
       userToken,
+      user,
       signIn,
       signOut,
     }}>
