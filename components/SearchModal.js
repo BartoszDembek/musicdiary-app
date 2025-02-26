@@ -75,6 +75,8 @@ const SearchModal = ({ visible, onClose, navigation }) => {
           navigation.navigate('Artist', { artistId: item.id });
         } else if (type === 'albums') {
           navigation.navigate('Album', { albumId: item.id });
+        } else if (type === 'tracks') {
+          navigation.navigate('Track', { trackId: item.id });
         }
       }, 100); // Small delay to ensure modal is closed first
     } catch (error) {
@@ -118,10 +120,8 @@ const SearchModal = ({ visible, onClose, navigation }) => {
       <TouchableOpacity 
         style={styles.resultItem}
         onPress={() => {
-          if (type !== 'tracks') {
-            console.log('Item pressed:', type, item.id);
-            handleItemPress(item, type);
-          }
+          console.log('Item pressed:', type, item.id);
+          handleItemPress(item, type);
         }}
       >
         {imageUrl ? (
