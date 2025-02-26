@@ -64,56 +64,65 @@ const SearchModal = ({ visible, onClose }) => {
       onPress={() => toggleSection(section)}
       style={styles.sectionHeaderContainer}
     >
-      <Text style={styles.sectionHeader}>
-        {title} ({itemCount})
-      </Text>
-      <Ionicons 
-        name={expandedSections[section] ? 'chevron-up' : 'chevron-down'} 
-        size={24} 
-        color="#BB9AF7" 
-      />
+      <View style={styles.sectionHeaderLeft}>
+        <Ionicons 
+          name={section === 'artists' ? 'person' : section === 'albums' ? 'disc' : 'musical-notes'} 
+          size={20} 
+          color="#BB9AF7" 
+          style={styles.sectionIcon}
+        />
+        <Text style={styles.sectionHeader}>
+          {title}
+        </Text>
+      </View>
+      <View style={styles.sectionHeaderRight}>
+        <Text style={styles.itemCount}>{itemCount}</Text>
+        <Ionicons 
+          name={expandedSections[section] ? 'chevron-up' : 'chevron-down'} 
+          size={20} 
+          color="#7A7C9E" 
+        />
+      </View>
     </TouchableOpacity>
   );
 
-  const renderArtist = (item) => (
-    <View style={styles.resultItem}>
-      <Image 
-        source={{ uri: item.images?.[0]?.url }} 
-        style={styles.albumCover}
-      />
-      <View style={styles.itemInfo}>
-        <Text style={styles.titleText}>{item.name}</Text>
-      </View>
-    </View>
-  );
+  const renderItem = (item, type) => {
+    const imageUrl = type === 'tracks' 
+      ? item.album?.images?.[0]?.url 
+      : item.images?.[0]?.url;
 
-  const renderAlbum = (item) => (
-    <View style={styles.resultItem}>
-      <Image 
-        source={{ uri: item.images?.[0]?.url }} 
-        style={styles.albumCover}
-      />
-      <View style={styles.itemInfo}>
-        <Text style={styles.titleText}>{item.name}</Text>
-        <Text style={styles.artistText}>{item.artists?.[0]?.name}</Text>
-      </View>
-    </View>
-  );
-
-  const renderTrack = (item) => (
-    <View style={styles.resultItem}>
-      <Image 
-        source={{ uri: item.album?.images?.[0]?.url }} 
-        style={styles.albumCover}
-      />
-      <View style={styles.itemInfo}>
-        <Text style={styles.titleText}>{item.name}</Text>
-        <Text style={styles.artistText}>
-          {item.artists?.[0]?.name} • {item.album?.name}
-        </Text>
-      </View>
-    </View>
-  );
+    return (
+      <TouchableOpacity style={styles.resultItem}>
+        {imageUrl ? (
+          <Image 
+            source={{ uri: imageUrl }} 
+            style={styles.albumCover}
+          />
+        ) : (
+          <View style={[styles.albumCover, styles.placeholderCover]}>
+            <Ionicons 
+              name={type === 'artists' ? 'person' : 'musical-note'} 
+              size={24} 
+              color="#7A7C9E" 
+            />
+          </View>
+        )}
+        <View style={styles.itemInfo}>
+          <Text style={styles.titleText} numberOfLines={1}>
+            {item.name}
+          </Text>
+          {type !== 'artists' && (
+            <Text style={styles.artistText} numberOfLines={1}>
+              {type === 'tracks' 
+                ? `${item.artists?.[0]?.name} • ${item.album?.name}`
+                : item.artists?.[0]?.name
+              }
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <Modal
@@ -125,20 +134,26 @@ const SearchModal = ({ visible, onClose }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <View style={styles.searchHeader}>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search..."
-              placeholderTextColor="#7A7C9E"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoFocus={true}
-            />
+            <View style={styles.searchInputContainer}>
+              <Ionicons name="search" size={20} color="#7A7C9E" style={styles.searchIcon} />
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search for music..."
+                placeholderTextColor="#7A7C9E"
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoFocus={true}
+              />
+            </View>
             <Pressable onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color="#BB9AF7" />
             </Pressable>
           </View>
 
-          <ScrollView style={styles.resultsContainer}>
+          <ScrollView 
+            style={styles.resultsContainer}
+            showsVerticalScrollIndicator={false}
+          >
             {isLoading ? (
               <View style={styles.centerContent}>
                 <ActivityIndicator color="#BB9AF7" size="large" />
@@ -155,7 +170,7 @@ const SearchModal = ({ visible, onClose }) => {
                     {expandedSections.artists && 
                       artists.map(item => (
                         <View key={`artist-${item.id}`}>
-                          {renderArtist(item)}
+                          {renderItem(item, 'artists')}
                         </View>
                       ))
                     }
@@ -168,7 +183,7 @@ const SearchModal = ({ visible, onClose }) => {
                     {expandedSections.albums && 
                       albums.map(item => (
                         <View key={`album-${item.id}`}>
-                          {renderAlbum(item)}
+                          {renderItem(item, 'albums')}
                         </View>
                       ))
                     }
@@ -181,7 +196,7 @@ const SearchModal = ({ visible, onClose }) => {
                     {expandedSections.tracks && 
                       tracks.map(item => (
                         <View key={`track-${item.id}`}>
-                          {renderTrack(item)}
+                          {renderItem(item, 'tracks')}
                         </View>
                       ))
                     }
@@ -205,68 +220,115 @@ const SearchModal = ({ visible, onClose }) => {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalContent: {
-    backgroundColor: '#1E1E2E',
-    marginTop: 60,
+    backgroundColor: '#1A1B26',
+    marginTop: 50,
     flex: 1,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    borderTopLeftRadius: 25,
+    borderTopRightRadius: 25,
+    padding: 15,
   },
   searchHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+    marginBottom: 15,
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#24283B',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    height: 40,
-    backgroundColor: '#2E2E3E',
-    borderRadius: 20,
-    paddingHorizontal: 15,
+    height: 45,
     color: '#fff',
+    fontSize: 16,
   },
   closeButton: {
-    padding: 5,
+    padding: 8,
+    backgroundColor: '#24283B',
+    borderRadius: 10,
   },
   section: {
-    marginVertical: 5,
-    backgroundColor: '#2A2A3E',
-    borderRadius: 10,
+    marginBottom: 15,
+    backgroundColor: '#24283B',
+    borderRadius: 16,
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   sectionHeaderContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#3A3A4E',
+    borderBottomColor: '#1A1B26',
+  },
+  sectionHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sectionHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionIcon: {
+    marginRight: 8,
+  },
+  itemCount: {
+    color: '#7A7C9E',
+    fontSize: 14,
+    fontWeight: '600',
   },
   resultItem: {
     flexDirection: 'row',
-    padding: 10,
+    padding: 12,
     alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#1A1B26',
   },
   albumCover: {
-    width: 50,
-    height: 50,
-    borderRadius: 5,
+    width: 55,
+    height: 55,
+    borderRadius: 8,
+    backgroundColor: '#24283B', // Adding background color for placeholder
   },
   itemInfo: {
-    marginLeft: 15,
+    marginLeft: 12,
     flex: 1,
+    justifyContent: 'center',
   },
   titleText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
+    marginBottom: 4,
   },
   artistText: {
     color: '#7A7C9E',
     fontSize: 14,
+  },
+  sectionHeader: {
+    color: '#BB9AF7',
+    fontSize: 17,
+    fontWeight: 'bold',
+  },
+  resultsContainer: {
+    flex: 1,
   },
   centerContent: {
     flex: 1,
@@ -274,25 +336,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     minHeight: 200,
   },
-  errorText: {
-    color: '#F7768E',
-    textAlign: 'center',
-    margin: 20,
-  },
   noResults: {
     color: '#7A7C9E',
     fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
   },
-  sectionHeader: {
-    color: '#BB9AF7',
-    fontSize: 18,
-    fontWeight: 'bold',
+  errorText: {
+    color: '#F7768E',
+    textAlign: 'center',
+    margin: 20,
   },
-  resultsContainer: {
-    flex: 1,
-    marginTop: 10,
+  placeholderCover: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#24283B',
   },
 });
 
