@@ -7,11 +7,10 @@ import { spotifyService } from '../services/spotifyService';
 import RenderAlbumCard from '../components/RenderAlbumCard';
 import SearchModal from '../components/SearchModal';
 
-const MainScreen = () => {
+const MainScreen = ({ navigation }) => {  // Get navigation from props directly
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
-  const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   
   const loadAlbums = async () => {
@@ -55,6 +54,7 @@ const MainScreen = () => {
       <SearchModal 
         visible={isSearchVisible}
         onClose={() => setIsSearchVisible(false)}
+        navigation={navigation}  // Pass navigation prop
       />
 
       <ScrollView 

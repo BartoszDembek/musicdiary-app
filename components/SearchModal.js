@@ -14,7 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { spotifyService } from '../services/spotifyService';
 
-const SearchModal = ({ visible, onClose }) => {
+const SearchModal = ({ visible, onClose, navigation }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [artists, setArtists] = useState([]);
   const [albums, setAlbums] = useState([]);
@@ -59,6 +59,29 @@ const SearchModal = ({ visible, onClose }) => {
     }));
   };
 
+  const handleItemPress = (item, type) => {
+    if (!item?.id) {
+      console.error('No item ID found:', item);
+      return;
+    }
+
+    console.log(`Navigating to ${type}:`, item.id);
+    
+    try {
+      setSearchQuery('');
+      onClose();
+      setTimeout(() => {
+        if (type === 'artists') {
+          navigation.navigate('Artist', { artistId: item.id });
+        } else if (type === 'albums') {
+          navigation.navigate('Album', { albumId: item.id });
+        }
+      }, 100); // Small delay to ensure modal is closed first
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
+  };
+
   const renderSectionHeader = (title, section, itemCount) => (
     <TouchableOpacity 
       onPress={() => toggleSection(section)}
@@ -92,7 +115,15 @@ const SearchModal = ({ visible, onClose }) => {
       : item.images?.[0]?.url;
 
     return (
-      <TouchableOpacity style={styles.resultItem}>
+      <TouchableOpacity 
+        style={styles.resultItem}
+        onPress={() => {
+          if (type !== 'tracks') {
+            console.log('Item pressed:', type, item.id);
+            handleItemPress(item, type);
+          }
+        }}
+      >
         {imageUrl ? (
           <Image 
             source={{ uri: imageUrl }} 
