@@ -30,5 +30,21 @@ export const reviewService = {
       console.error('Error getting review:', error);
       return null;
     }
+  },
+
+  getReviewsBySpotifyId: async (spotifyId, type) => {
+    try {
+      const response = await axios.get(`${API_URL}/review/${spotifyId}?type=${type}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting reviews:', error);
+      return null;
+    }
+  },
+
+  calculateAverageRating: (reviews) => {
+    if (!reviews || reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+    return Math.round((sum / reviews.length) * 10) / 10;
   }
 };

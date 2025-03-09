@@ -6,6 +6,8 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
 import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
+import AverageRating from '../components/AverageRating';
+import { reviewService } from '../services/reviewService';
 
 const TrackScreen = ({ route }) => {
   const { trackId } = route.params;
@@ -13,11 +15,19 @@ const TrackScreen = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const { user } = useAuth();
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
 
-  const loadTrack = async () => {
+  const loadData = async () => {
     try {
-      const response = await spotifyService.getTrackByID(trackId);
-      setTrack(response);
+      const [trackData, reviewsData] = await Promise.all([
+        spotifyService.getTrackByID(trackId),
+        reviewService.getReviewsBySpotifyId(trackId, 'song')
+      ]);
+      
+      setTrack(trackData);
+      setReviews(reviewsData || []);
+      setAverageRating(reviewService.calculateAverageRating(reviewsData));
     } catch (error) {
       Alert.alert("Error", "Failed to load track data");
     } finally {
@@ -40,7 +50,7 @@ const TrackScreen = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
-      loadTrack();
+      loadData();
     }, [trackId])
   );
 
@@ -84,6 +94,7 @@ const TrackScreen = ({ route }) => {
           
           <View style={styles.trackInfo}>
             <Text style={styles.trackTitle}>{track.name}</Text>
+            <AverageRating rating={averageRating} count={reviews.length} />
             <Pressable onPress={() => navigation.navigate('Artist', { artistId: track.artists[0].id })}>
               <Text style={styles.artistName}>
                 {track.artists.map(artist => artist.name).join(', ')}

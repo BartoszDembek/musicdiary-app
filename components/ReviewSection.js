@@ -1,67 +1,99 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewService } from '../services/reviewService';
 import ReviewModal from './ReviewModal';
 
-const ReviewSection = ({ userId,itemId, type }) => {
+const ReviewItem = ({ review, isUserReview, onEdit }) => (
+  <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
+    <View style={styles.reviewHeader}>
+      <View style={styles.ratingDisplay}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Ionicons
+            key={star}
+            name={star <= review.rating ? "star" : "star-outline"}
+            size={16}
+            color="#BB9AF7"
+          />
+        ))}
+      </View>
+      {isUserReview && (
+        <Pressable onPress={onEdit} style={styles.editButton}>
+          <Ionicons name="create" size={20} color="#7AA2F7" />
+        </Pressable>
+      )}
+    </View>
+    <Text style={styles.reviewText}>{review.text}</Text>
+    <Text style={styles.reviewDate}>
+      {new Date(review.created_at).toLocaleDateString()}
+    </Text>
+  </View>
+);
+
+const ReviewSection = ({ userId, itemId, type }) => {
+  const [userReview, setUserReview] = useState(null);
+  const [allReviews, setAllReviews] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
-  const [isModalVisible, setIsModalVisible] = useState(false);
 
   useEffect(() => {
-    loadReview();
+    loadReviews();
   }, [itemId]);
 
-  const loadReview = async () => {
-    const savedReview = await reviewService.getReview(itemId, type);
-    if (savedReview) {
-      setRating(savedReview.rating);
-      setReview(savedReview.text);
+  const loadReviews = async () => {
+    const reviews = await reviewService.getReviewsBySpotifyId(itemId, type);
+    const userRev = reviews.find(r => r.user_id === userId);
+    const otherReviews = reviews.filter(r => r.user_id !== userId);
+
+    setUserReview(userRev);
+    setAllReviews(otherReviews);
+
+    if (userRev) {
+      setRating(userRev.rating);
+      setReview(userRev.text);
     }
   };
 
   const handleSave = async () => {
     await reviewService.saveReview(userId, itemId, review, type, rating);
     setIsModalVisible(false);
+    loadReviews(); // Reload reviews after saving
   };
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={styles.section}>
         <Text style={styles.title}>Your Review</Text>
-        <Pressable 
-          onPress={() => setIsModalVisible(true)} 
-          style={styles.editButton}
-        >
-          <Ionicons name="create" size={24} color="#7AA2F7" />
-        </Pressable>
+        {userReview ? (
+          <ReviewItem 
+            review={userReview} 
+            isUserReview={true} 
+            onEdit={() => setIsModalVisible(true)}
+          />
+        ) : (
+          <Pressable 
+            onPress={() => setIsModalVisible(true)}
+            style={styles.addReviewButton}
+          >
+            <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
+            <Text style={styles.addReviewText}>Add your review</Text>
+          </Pressable>
+        )}
       </View>
 
-      {(rating > 0 || review) ? (
-        <View style={styles.content}>
-          <View style={styles.ratingDisplay}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <Ionicons
-                key={star}
-                name={star <= rating ? "star" : "star-outline"}
-                size={20}
-                color="#BB9AF7"
-              />
-            ))}
-          </View>
-          {review && (
-            <Text style={styles.reviewText}>{review}</Text>
-          )}
+      {allReviews.length > 0 && (
+        <View style={styles.section}>
+          <Text style={styles.title}>Other Reviews</Text>
+          <FlatList
+            data={allReviews}
+            renderItem={({ item }) => (
+              <ReviewItem review={item} isUserReview={false} />
+            )}
+            keyExtractor={item => item.id.toString()}
+            scrollEnabled={false}
+          />
         </View>
-      ) : (
-        <Pressable 
-          onPress={() => setIsModalVisible(true)}
-          style={styles.addReviewButton}
-        >
-          <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
-          <Text style={styles.addReviewText}>Add your review</Text>
-        </Pressable>
       )}
 
       <ReviewModal
@@ -80,39 +112,50 @@ const ReviewSection = ({ userId,itemId, type }) => {
 const styles = StyleSheet.create({
   container: {
     marginTop: 25,
+  },
+  section: {
     backgroundColor: 'rgba(187, 154, 247, 0.05)',
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(187, 154, 247, 0.1)',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   title: {
     fontSize: 20,
     color: '#BB9AF7',
     fontWeight: '600',
+    marginBottom: 16,
   },
-  editButton: {
-    padding: 8,
-  },
-  content: {
+  reviewItem: {
     backgroundColor: '#2D2D44',
     padding: 16,
     borderRadius: 12,
+    marginBottom: 12,
+  },
+  userReviewItem: {
+    borderColor: '#7AA2F7',
+    borderWidth: 1,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   ratingDisplay: {
     flexDirection: 'row',
-    marginBottom: 12,
+    gap: 2,
   },
   reviewText: {
     color: '#C0CAF5',
     fontSize: 16,
     lineHeight: 24,
+    marginBottom: 8,
+  },
+  reviewDate: {
+    color: '#565F89',
+    fontSize: 12,
   },
   addReviewButton: {
     flexDirection: 'row',
@@ -127,6 +170,9 @@ const styles = StyleSheet.create({
     color: '#7AA2F7',
     fontSize: 16,
     fontWeight: '500',
+  },
+  editButton: {
+    padding: 4,
   },
 });
 

@@ -6,24 +6,30 @@ import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
 import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
+import AverageRating from '../components/AverageRating';
+import { reviewService } from '../services/reviewService';
 
 const AlbumScreen = ({ route }) => {
   const { user } = useAuth();
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
   const navigation = useNavigation();
 
-  const loadAlbum = async () => {
+  const loadData = async () => {
     try {
-      const response = await spotifyService.getAlbumByID(albumId);
-      setAlbum(response);
+      const [albumData, reviewsData] = await Promise.all([
+        spotifyService.getAlbumByID(albumId),
+        reviewService.getReviewsBySpotifyId(albumId, 'album')
+      ]);
+      
+      setAlbum(albumData);
+      setReviews(reviewsData || []);
+      setAverageRating(reviewService.calculateAverageRating(reviewsData));
     } catch (error) {
-      Alert.alert(
-        "Błąd",
-        "Nie udało się załadować albumu",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Error", "Failed to load album data");
     } finally {
       setLoading(false);
     }
@@ -38,7 +44,7 @@ const AlbumScreen = ({ route }) => {
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
-      loadAlbum();
+      loadData();
     }, [albumId])
   );
 
@@ -82,6 +88,7 @@ const AlbumScreen = ({ route }) => {
           
           <View style={styles.albumInfo}>
             <Text style={styles.albumTitle}>{album.name}</Text>
+            <AverageRating rating={averageRating} count={reviews.length} />
             <Pressable onPress={() => navigation.navigate('Artist', { artistId: album.artists[0].id })}>
               <Text style={styles.artistName}>
                 {album.artists.map(artist => artist.name).join(', ')}
