@@ -50,6 +50,8 @@ const MainScreen = ({ navigation }) => {  // Get navigation from props directly
           <Ionicons name="search" size={24} color="#BB9AF7" />
         </Pressable>
       </View>
+      
+      <Text style={styles.subtitle}>New Releases</Text>
 
       <SearchModal 
         visible={isSearchVisible}
@@ -106,6 +108,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(187, 154, 247, 0.1)',
     borderRadius: 20,
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#BB9AF7',
+    marginLeft: 20,
+    marginTop: 10,
+    marginBottom: 5,
   },
   content: {
     flex: 1,

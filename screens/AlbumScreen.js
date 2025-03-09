@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
+import ReviewSection from '../components/ReviewSection';
+import { useAuth } from '../context/AuthContext';
 
 const AlbumScreen = ({ route }) => {
+  const { user } = useAuth();
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,64 +57,76 @@ const AlbumScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerButtons}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
-              <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
-            </Pressable>
-            <Pressable onPress={openInSpotify} style={styles.iconButton}>
-              <Entypo name="spotify" size={24} color="#1DB954" />
-            </Pressable>
-          </View>
-        </View>
-
-        <Image source={{ uri: album.images[0].url }} style={styles.albumImage} />
-        
-        <View style={styles.albumInfo}>
-          <Text style={styles.albumTitle}>{album.name}</Text>
-          <Pressable onPress={() => navigation.navigate('Artist', { artistId: album.artists[0].id })}>
-            <Text style={styles.artistName}>
-              {album.artists.map(artist => artist.name).join(', ')}
-            </Text>
-          </Pressable>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="musical-notes" size={20} color="#BB9AF7" />
-              <Text style={styles.statText}>{album.total_tracks} tracks</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="calendar" size={20} color="#BB9AF7" />
-              <Text style={styles.statText}>{album.release_date}</Text>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
+      >
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <View style={styles.headerButtons}>
+              <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
+                <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+              </Pressable>
+              <Pressable onPress={openInSpotify} style={styles.iconButton}>
+                <Entypo name="spotify" size={24} color="#1DB954" />
+              </Pressable>
             </View>
           </View>
 
-          <View style={styles.detailsContainer}>
-            <Text style={styles.sectionTitle}>Album Details</Text>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Type</Text>
-              <Text style={styles.detailValue}>{album.album_type}</Text>
-            </View>
-            {album.genres.length > 0 && (
-              <View style={styles.detailRow}>
-                <Text style={styles.detailLabel}>Genres</Text>
-                <View style={styles.genresContainer}>
-                  {album.genres.map((genre, index) => (
-                    <View key={index} style={styles.genreTag}>
-                      <Text style={styles.genreText}>{genre}</Text>
-                    </View>
-                  ))}
-                </View>
+          <Image source={{ uri: album.images[0].url }} style={styles.albumImage} />
+          
+          <View style={styles.albumInfo}>
+            <Text style={styles.albumTitle}>{album.name}</Text>
+            <Pressable onPress={() => navigation.navigate('Artist', { artistId: album.artists[0].id })}>
+              <Text style={styles.artistName}>
+                {album.artists.map(artist => artist.name).join(', ')}
+              </Text>
+            </Pressable>
+
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Ionicons name="musical-notes" size={20} color="#BB9AF7" />
+                <Text style={styles.statText}>{album.total_tracks} tracks</Text>
               </View>
-            )}
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Label</Text>
-              <Text style={styles.detailValue}>{album.label}</Text>
+              <View style={styles.statItem}>
+                <Ionicons name="calendar" size={20} color="#BB9AF7" />
+                <Text style={styles.statText}>{album.release_date}</Text>
+              </View>
             </View>
+
+            <View style={styles.detailsContainer}>
+              <Text style={styles.sectionTitle}>Album Details</Text>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Type</Text>
+                <Text style={styles.detailValue}>{album.album_type}</Text>
+              </View>
+              {album.genres.length > 0 && (
+                <View style={styles.detailRow}>
+                  <Text style={styles.detailLabel}>Genres</Text>
+                  <View style={styles.genresContainer}>
+                    {album.genres.map((genre, index) => (
+                      <View key={index} style={styles.genreTag}>
+                        <Text style={styles.genreText}>{genre}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Label</Text>
+                <Text style={styles.detailValue}>{album.label}</Text>
+              </View>
+            </View>
+
+            <ReviewSection userId={user?.id} itemId={albumId} type="album" />
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

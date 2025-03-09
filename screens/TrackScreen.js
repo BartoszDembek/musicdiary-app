@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, Pressable, Linking } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
+import ReviewSection from '../components/ReviewSection';
+import { useAuth } from '../context/AuthContext';
 
 const TrackScreen = ({ route }) => {
   const { trackId } = route.params;
   const [track, setTrack] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  const { user } = useAuth();
 
   const loadTrack = async () => {
     try {
@@ -56,64 +59,76 @@ const TrackScreen = ({ route }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerButtons}>
-            <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
-              <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
-            </Pressable>
-            <Pressable onPress={openInSpotify} style={styles.iconButton}>
-              <Entypo name="spotify" size={24} color="#1DB954" />
-            </Pressable>
-          </View>
-        </View>
-
-        <Image source={{ uri: track.album.images[0].url }} style={styles.trackImage} />
-        
-        <View style={styles.trackInfo}>
-          <Text style={styles.trackTitle}>{track.name}</Text>
-          <Pressable onPress={() => navigation.navigate('Artist', { artistId: track.artists[0].id })}>
-            <Text style={styles.artistName}>
-              {track.artists.map(artist => artist.name).join(', ')}
-            </Text>
-          </Pressable>
-
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="time" size={20} color="#BB9AF7" />
-              <Text style={styles.statText}>{formatDuration(track.duration_ms)}</Text>
-            </View>
-            <View style={styles.statItem}>
-              <Ionicons name="musical-note" size={20} color="#BB9AF7" />
-              <Text style={styles.statText}>{track.popularity}% popularity</Text>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
+      >
+        <ScrollView 
+          style={styles.content} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.header}>
+            <View style={styles.headerButtons}>
+              <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
+                <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+              </Pressable>
+              <Pressable onPress={openInSpotify} style={styles.iconButton}>
+                <Entypo name="spotify" size={24} color="#1DB954" />
+              </Pressable>
             </View>
           </View>
 
-          <View style={styles.detailsContainer}>
-            <Text style={styles.sectionTitle}>Track Details</Text>
-            <Pressable 
-              style={styles.detailRow}
-              onPress={() => navigation.navigate('Album', { albumId: track.album.id })}
-            >
-              <Text style={styles.detailLabel}>Album</Text>
-              <Text style={styles.albumLink}>{track.album.name}</Text>
+          <Image source={{ uri: track.album.images[0].url }} style={styles.trackImage} />
+          
+          <View style={styles.trackInfo}>
+            <Text style={styles.trackTitle}>{track.name}</Text>
+            <Pressable onPress={() => navigation.navigate('Artist', { artistId: track.artists[0].id })}>
+              <Text style={styles.artistName}>
+                {track.artists.map(artist => artist.name).join(', ')}
+              </Text>
             </Pressable>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Track Number</Text>
-              <Text style={styles.detailValue}>{track.track_number} of {track.album.total_tracks}</Text>
-            </View>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>Release Date</Text>
-              <Text style={styles.detailValue}>{track.album.release_date}</Text>
-            </View>
-            {track.explicit && (
-              <View style={styles.explicitTag}>
-                <Text style={styles.explicitText}>Explicit</Text>
+
+            <View style={styles.statsContainer}>
+              <View style={styles.statItem}>
+                <Ionicons name="time" size={20} color="#BB9AF7" />
+                <Text style={styles.statText}>{formatDuration(track.duration_ms)}</Text>
               </View>
-            )}
+              <View style={styles.statItem}>
+                <Ionicons name="musical-note" size={20} color="#BB9AF7" />
+                <Text style={styles.statText}>{track.popularity}% popularity</Text>
+              </View>
+            </View>
+
+            <View style={styles.detailsContainer}>
+              <Text style={styles.sectionTitle}>Track Details</Text>
+              <Pressable 
+                style={styles.detailRow}
+                onPress={() => navigation.navigate('Album', { albumId: track.album.id })}
+              >
+                <Text style={styles.detailLabel}>Album</Text>
+                <Text style={styles.albumLink}>{track.album.name}</Text>
+              </Pressable>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Track Number</Text>
+                <Text style={styles.detailValue}>{track.track_number} of {track.album.total_tracks}</Text>
+              </View>
+              <View style={styles.detailRow}>
+                <Text style={styles.detailLabel}>Release Date</Text>
+                <Text style={styles.detailValue}>{track.album.release_date}</Text>
+              </View>
+              {track.explicit && (
+                <View style={styles.explicitTag}>
+                  <Text style={styles.explicitText}>Explicit</Text>
+                </View>
+              )}
+            </View>
+
+            <ReviewSection userId={user?.id} itemId={trackId} type="song" />
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
