@@ -4,18 +4,32 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
+import { followService } from '../services/followService';
+import { userService } from '../services/userService';
 import ArtistStats from '../components/artist/ArtistStats';
 import ArtistGenres from '../components/artist/ArtistGenres';
 import TopTracks from '../components/artist/TopTracks';
 import ArtistAlbums from '../components/artist/ArtistAlbums';
+import { useAuth } from '../context/AuthContext';
 
 const ArtistScreen = ({ route }) => {
   const { artistId } = route.params;
+  const { userProfile, user, updateUserProfile } = useAuth();
   const [artist, setArtist] = useState(null);
   const [albums, setAlbums] = useState([]);
   const [topTracks, setTopTracks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFollowed, setIsFollowed] = useState(false);
   const navigation = useNavigation();
+
+  const checkIfFollowed = () => {
+    if (userProfile?.follows?.[0]?.follow) {
+      const isArtistFollowed = userProfile.follows[0].follow.includes(artistId);
+      setIsFollowed(isArtistFollowed);
+    } else {
+      setIsFollowed(false);
+    }
+  };
 
   const loadArtistData = async () => {
     try {
@@ -28,6 +42,7 @@ const ArtistScreen = ({ route }) => {
       setArtist(artistData);
       setAlbums(albumsData.items);
       setTopTracks(tracksData.tracks);
+      checkIfFollowed();
     } catch (error) {
       Alert.alert("Error", "Failed to load artist data");
     } finally {
@@ -38,6 +53,28 @@ const ArtistScreen = ({ route }) => {
   const openInSpotify = () => {
     if (artist?.external_urls?.spotify) {
       Linking.openURL(artist.external_urls.spotify);
+    }
+  };
+
+  const handleFollow = async () => {
+    try {
+      let updatedProfile;
+      if (isFollowed) {
+        updatedProfile = await followService.unfollowArtist(user.id, artistId);
+      } else {
+        updatedProfile = await followService.followArtist(user.id, artistId);
+      }
+      
+      if (updatedProfile) {
+        // Fetch fresh user profile data
+        const freshProfileData = await userService.getUserProfile(user.id);
+        if (freshProfileData && freshProfileData[0]) {
+          await updateUserProfile(freshProfileData[0]);
+          setIsFollowed(!isFollowed);
+        }
+      }
+    } catch (error) {
+      Alert.alert("Error", isFollowed ? "Failed to unfollow artist" : "Failed to follow artist");
     }
   };
 
@@ -69,9 +106,21 @@ const ArtistScreen = ({ route }) => {
             <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
               <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
             </Pressable>
-            <Pressable onPress={openInSpotify} style={styles.iconButton}>
-              <Entypo name="spotify" size={24} color="#1DB954" />
-            </Pressable>
+            <View style={styles.rightButtons}>
+              <Pressable 
+                onPress={handleFollow} 
+                style={[styles.iconButton, isFollowed && styles.followingButton]}
+              >
+                <Ionicons 
+                  name={isFollowed ? "heart" : "heart-outline"} 
+                  size={24} 
+                  color="#BB9AF7" 
+                />
+              </Pressable>
+              <Pressable onPress={openInSpotify} style={styles.iconButton}>
+                <Entypo name="spotify" size={24} color="#1DB954" />
+              </Pressable>
+            </View>
           </View>
         </View>
 
@@ -114,6 +163,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(187, 154, 247, 0.1)',
     borderRadius: 20,
+  },
+  rightButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  followingButton: {
+    backgroundColor: 'rgba(187, 154, 247, 0.3)',
   },
   artistImage: {
     width: '100%',

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
@@ -19,23 +19,7 @@ const mockUserData = {
 
 const ProfileScreen = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
-  const [userProfile, setUserProfile] = useState(null);
-  const { signOut, user } = useAuth();
-
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user?.id) return;
-      
-      try {
-        const profile = await userService.getUserProfile(user.id);
-        setUserProfile(profile[0]); // Assuming the first item in the array is the user profile
-      } catch (error) {
-        console.error('Error fetching user profile:', error.message);
-      }
-    };
-
-    fetchUserProfile();
-  }, [user?.id]);
+  const { signOut, user, userProfile } = useAuth();
 
   const formatJoinDate = (dateString) => {
     const date = new Date(dateString);
@@ -49,6 +33,14 @@ const ProfileScreen = () => {
   const handleLogout = async () => {
     await signOut();
     setIsSettingsVisible(false);
+  };
+
+  // Add null check for follows array
+  const getFollowsCount = () => {
+    if (!userProfile?.follows || !userProfile.follows[0]) {
+      return 0;
+    }
+    return Array.isArray(userProfile.follows[0].follow) ? userProfile.follows[0].follow.length : 0;
   };
 
   return (
@@ -105,7 +97,7 @@ const ProfileScreen = () => {
               />
             ) : (
               <Text style={styles.avatarText}>
-                {userProfile?.username?.[0]?.toUpperCase() || '?'}
+                {userProfile?.username ? userProfile.username[0].toUpperCase() : '?'}
               </Text>
             )}
           </View>
@@ -116,14 +108,14 @@ const ProfileScreen = () => {
           </Text>
         </View>
 
-        {/* Stats - using mockUserData */}
+        {/* Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{mockUserData.stats.albumsReviewed}</Text>
             <Text style={styles.statLabel}>Reviews</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{mockUserData.stats.artistsFollowed}</Text>
+            <Text style={styles.statNumber}>{getFollowsCount()}</Text>
             <Text style={styles.statLabel}>Following</Text>
           </View>
           <View style={styles.statItem}>

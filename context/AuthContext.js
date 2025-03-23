@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userService } from '../services/userService';
 
 const AuthContext = createContext({});
 
@@ -7,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [userToken, setUserToken] = useState(null);
   const [user, setUser] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
     checkAuthStatus();
@@ -16,8 +18,13 @@ export const AuthProvider = ({ children }) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       const userData = await AsyncStorage.getItem('userData');
+      const profileData = await AsyncStorage.getItem('userProfile');
+      
       if (userData) {
         setUser(JSON.parse(userData));
+      }
+      if (profileData) {
+        setUserProfile(JSON.parse(profileData));
       }
       setUserToken(token);
     } catch (error) {
@@ -33,17 +40,33 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
       setUserToken(token);
       setUser(userData);
+
+      // Fetch and store user profile
+      const profileData = await userService.getUserProfile(userData.id);
+      if (profileData && profileData[0]) {
+        await AsyncStorage.setItem('userProfile', JSON.stringify(profileData[0]));
+        setUserProfile(profileData[0]);
+      }
     } catch (error) {
       console.error('Error storing auth data:', error);
     }
   };
 
+  const updateUserProfile = async (profileData) => {
+    try {
+      await AsyncStorage.setItem('userProfile', JSON.stringify(profileData));
+      setUserProfile(profileData);
+    } catch (error) {
+      console.error('Error storing profile data:', error);
+    }
+  };
+
   const signOut = async () => {
     try {
-      await AsyncStorage.removeItem('userToken');
-      await AsyncStorage.removeItem('userData');
+      await AsyncStorage.multiRemove(['userToken', 'userData', 'userProfile']);
       setUserToken(null);
       setUser(null);
+      setUserProfile(null);
     } catch (error) {
       console.error('Error removing auth data:', error);
     }
@@ -54,8 +77,10 @@ export const AuthProvider = ({ children }) => {
       isLoading,
       userToken,
       user,
+      userProfile,
       signIn,
       signOut,
+      updateUserProfile,
     }}>
       {children}
     </AuthContext.Provider>
