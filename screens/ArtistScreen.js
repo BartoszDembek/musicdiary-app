@@ -11,6 +11,7 @@ import ArtistGenres from '../components/artist/ArtistGenres';
 import TopTracks from '../components/artist/TopTracks';
 import ArtistAlbums from '../components/artist/ArtistAlbums';
 import { useAuth } from '../context/AuthContext';
+import { colors, commonStyles } from '../theme';
 
 const ArtistScreen = ({ route }) => {
   const { artistId } = route.params;
@@ -104,7 +105,7 @@ const ArtistScreen = ({ route }) => {
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
-              <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+              <Ionicons name="arrow-back" size={24} color={colors.primary} />
             </Pressable>
             <View style={styles.rightButtons}>
               <Pressable 
@@ -114,11 +115,11 @@ const ArtistScreen = ({ route }) => {
                 <Ionicons 
                   name={isFollowed ? "heart" : "heart-outline"} 
                   size={24} 
-                  color="#BB9AF7" 
+                  color={colors.primary} 
                 />
               </Pressable>
               <Pressable onPress={openInSpotify} style={styles.iconButton}>
-                <Entypo name="spotify" size={24} color="#1DB954" />
+                <Entypo name="spotify" size={24} color={colors.spotify} />
               </Pressable>
             </View>
           </View>
@@ -141,35 +142,26 @@ const ArtistScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   content: {
-    flex: 1,
+    ...commonStyles.content
   },
   header: {
     padding: 20,
   },
   headerButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
+    ...commonStyles.headerButtons
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
-    borderRadius: 20,
+    ...commonStyles.iconButton
   },
   rightButtons: {
     flexDirection: 'row',
     gap: 10,
   },
   followingButton: {
-    backgroundColor: 'rgba(187, 154, 247, 0.3)',
+    backgroundColor: colors.primaryMedium,
   },
   artistImage: {
     width: '100%',
@@ -182,31 +174,20 @@ const styles = StyleSheet.create({
   artistName: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: '#BB9AF7',
+    color: colors.primary,
     marginBottom: 20,
   },
   skeletonHeader: {
-    width: '100%',
-    height: 60,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 20,
+    ...commonStyles.skeletonHeader
   },
   skeletonContent: {
     alignItems: 'center',
   },
   skeletonImage: {
-    width: '100%',
-    height: 300,
-    borderRadius: 8,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 20,
+    ...commonStyles.skeletonImage
   },
   skeletonText: {
-    width: 150,
-    height: 20,
-    borderRadius: 4,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 10,
+    ...commonStyles.skeletonText
   },
 });
 

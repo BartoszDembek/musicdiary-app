@@ -15,6 +15,7 @@ import Header from '../components/Auth/Header';
 import { authService } from '../services/authService';
 import { Alert } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { colors, commonStyles } from '../theme';
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
@@ -128,14 +129,12 @@ const LoginScreen = () => {
       </KeyboardAvoidingView>
     </SafeAreaView>
     </>
-
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -149,38 +148,24 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
-    color: '#7AA2F7', // Jasny niebieski
-    marginBottom: 8,
+    ...commonStyles.inputLabel
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: '#414868', // Ciemny szary z niebieskim odcieniem
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    color: '#ffffff',
+    ...commonStyles.input
   },
   forgotPassword: {
     alignSelf: 'flex-end',
     marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#7DCFFF', // Jasny turkusowy
+    color: colors.secondaryLight,
     fontSize: 14,
   },
   loginButton: {
-    backgroundColor: '#BB9AF7', // Fioletowy akcent
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
+    ...commonStyles.primaryButton
   },
   loginButtonText: {
-    color: '#1E1E2E', // Ciemny granatowy
-    fontSize: 18,
-    fontWeight: '600',
+    ...commonStyles.primaryButtonText
   },
   registerContainer: {
     flexDirection: 'row',
@@ -188,11 +173,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   registerText: {
-    color: '#C0CAF5', // Jasny niebieski-szary
+    color: colors.textPrimary,
     fontSize: 14,
   },
   registerLink: {
-    color: '#BB9AF7', // Fioletowy akcent
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

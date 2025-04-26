@@ -8,6 +8,7 @@ import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
 import AverageRating from '../components/AverageRating';
 import { reviewService } from '../services/reviewService';
+import { colors, commonStyles } from '../theme';
 
 const AlbumScreen = ({ route }) => {
   const { user } = useAuth();
@@ -76,10 +77,10 @@ const AlbumScreen = ({ route }) => {
           <View style={styles.header}>
             <View style={styles.headerButtons}>
               <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
-                <Ionicons name="arrow-back" size={24} color="#BB9AF7" />
+                <Ionicons name="arrow-back" size={24} color={colors.primary} />
               </Pressable>
               <Pressable onPress={openInSpotify} style={styles.iconButton}>
-                <Entypo name="spotify" size={24} color="#1DB954" />
+                <Entypo name="spotify" size={24} color={colors.spotify} />
               </Pressable>
             </View>
           </View>
@@ -97,11 +98,11 @@ const AlbumScreen = ({ route }) => {
 
             <View style={styles.statsContainer}>
               <View style={styles.statItem}>
-                <Ionicons name="musical-notes" size={20} color="#BB9AF7" />
+                <Ionicons name="musical-notes" size={20} color={colors.primary} />
                 <Text style={styles.statText}>{album.total_tracks} tracks</Text>
               </View>
               <View style={styles.statItem}>
-                <Ionicons name="calendar" size={20} color="#BB9AF7" />
+                <Ionicons name="calendar" size={20} color={colors.primary} />
                 <Text style={styles.statText}>{album.release_date}</Text>
               </View>
             </View>
@@ -140,28 +141,19 @@ const AlbumScreen = ({ route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   content: {
-    flex: 1,
+    ...commonStyles.content
   },
   header: {
     padding: 20,
   },
   headerButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
+    ...commonStyles.headerButtons
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
-    borderRadius: 20,
+    ...commonStyles.iconButton
   },
   albumImage: {
     width: '100%',
@@ -172,55 +164,37 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   albumTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#BB9AF7',
-    marginBottom: 8,
+    ...commonStyles.title
   },
   artistName: {
     fontSize: 18,
-    color: '#7AA2F7',
+    color: colors.secondary,
     marginBottom: 20,
     textDecorationLine: 'underline',
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginBottom: 30,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    ...commonStyles.statsContainer
   },
   statItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 30,
+    ...commonStyles.statItem
   },
   statText: {
-    color: '#C0CAF5',
-    marginLeft: 8,
-    fontSize: 16,
+    ...commonStyles.statText
   },
   detailsContainer: {
-    marginTop: 10,
+    ...commonStyles.detailsContainer
   },
   sectionTitle: {
-    fontSize: 20,
-    color: '#BB9AF7',
-    marginBottom: 15,
-    fontWeight: '600',
+    ...commonStyles.sectionTitle
   },
   detailRow: {
-    marginBottom: 15,
+    ...commonStyles.detailRow
   },
   detailLabel: {
-    color: '#7AA2F7',
-    fontSize: 16,
-    marginBottom: 5,
+    ...commonStyles.detailLabel
   },
   detailValue: {
-    color: '#C0CAF5',
-    fontSize: 16,
+    ...commonStyles.detailValue
   },
   genresContainer: {
     flexDirection: 'row',
@@ -228,39 +202,28 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   genreTag: {
-    backgroundColor: '#414868',
+    backgroundColor: colors.border,
     borderRadius: 15,
     paddingVertical: 6,
     paddingHorizontal: 12,
     margin: 4,
   },
   genreText: {
-    color: '#C0CAF5',
+    color: colors.textPrimary,
     fontSize: 14,
   },
   skeletonHeader: {
-    width: '100%',
-    height: 60,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 20,
+    ...commonStyles.skeletonHeader
   },
   skeletonContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   skeletonImage: {
-    width: '100%',
-    height: 300,
-    borderRadius: 8,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 20,
+    ...commonStyles.skeletonImage
   },
   skeletonText: {
-    width: 150,
-    height: 20,
-    borderRadius: 4,
-    backgroundColor: '#2E2E3E',
-    marginBottom: 10,
+    ...commonStyles.skeletonText
   },
 });
 

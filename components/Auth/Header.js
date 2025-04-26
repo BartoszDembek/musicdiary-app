@@ -1,4 +1,5 @@
-import { View, StyleSheet,Text } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
+import { colors } from '../../theme';
 
 const Header = ({subtitle}) => {
     return (
@@ -13,13 +14,13 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 36,
         fontWeight: 'bold',
-        color: '#BB9AF7',
+        color: colors.primary,
         marginBottom: 8,
         textAlign: 'center',
     },
     subtitle: {
         fontSize: 16,
-        color: '#7AA2F7',
+        color: colors.secondary,
         marginBottom: 40,
         textAlign: 'center',
     },

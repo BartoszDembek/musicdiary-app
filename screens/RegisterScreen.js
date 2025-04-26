@@ -14,10 +14,9 @@ import { Link } from '@react-navigation/native';
 import { authService } from '../services/authService';
 import Header from '../components/Auth/Header';
 import { Alert } from 'react-native';
-import {
-  useNavigation,
-} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
+import { colors, commonStyles } from '../theme';
 
 const RegisterScreen = ({navigation}) => {
   const [username, setUsername] = useState('');
@@ -194,8 +193,7 @@ const RegisterScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   keyboardAvoidingView: {
     flex: 1,
@@ -212,44 +210,30 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 16,
-    color: '#7AA2F7',
-    marginBottom: 8,
+    ...commonStyles.inputLabel
   },
   input: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    borderColor: '#414868',
-    borderRadius: 12,
-    padding: 15,
-    fontSize: 16,
-    color: '#ffffff',
+    ...commonStyles.input
   },
   termsContainer: {
     marginBottom: 20,
     paddingHorizontal: 10,
   },
   termsText: {
-    color: '#C0CAF5',
+    color: colors.textPrimary,
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
   },
   termsLink: {
-    color: '#7DCFFF',
+    color: colors.secondaryLight,
     textDecorationLine: 'underline',
   },
   registerButton: {
-    backgroundColor: '#BB9AF7',
-    padding: 15,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginBottom: 20,
+    ...commonStyles.primaryButton
   },
   registerButtonText: {
-    color: '#1E1E2E',
-    fontSize: 18,
-    fontWeight: '600',
+    ...commonStyles.primaryButtonText
   },
   loginContainer: {
     flexDirection: 'row',
@@ -257,11 +241,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginText: {
-    color: '#C0CAF5',
+    color: colors.textPrimary,
     fontSize: 14,
   },
   loginLink: {
-    color: '#BB9AF7',
+    color: colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Mod
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
+import { colors, commonStyles } from '../theme';
 
 const mockUserData = {
   stats: {
@@ -37,6 +38,7 @@ const ProfileScreen = () => {
 
   // Add null check for follows array
   const getFollowsCount = () => {
+    console.log('User Profile:', userProfile['follows']); // Debugging line
     if (!userProfile?.follows || !userProfile.follows[0]) {
       return 0;
     }
@@ -53,7 +55,7 @@ const ProfileScreen = () => {
             style={styles.settingsButton}
             onPress={() => setIsSettingsVisible(true)}
           >
-            <Ionicons name="settings-outline" size={24} color="#BB9AF7" />
+            <Ionicons name="settings-outline" size={24} color={colors.primary} />
           </Pressable>
         </View>
 
@@ -72,7 +74,7 @@ const ProfileScreen = () => {
                   onPress={() => setIsSettingsVisible(false)}
                   style={styles.closeButton}
                 >
-                  <Ionicons name="close" size={24} color="#BB9AF7" />
+                  <Ionicons name="close" size={24} color={colors.primary} />
                 </Pressable>
               </View>
 
@@ -80,7 +82,7 @@ const ProfileScreen = () => {
                 style={styles.logoutButton}
                 onPress={handleLogout}
               >
-                <Ionicons name="log-out-outline" size={24} color="#F7768E" />
+                <Ionicons name="log-out-outline" size={24} color={colors.tertiary} />
                 <Text style={styles.logoutText}>Sign Out</Text>
               </Pressable>
             </View>
@@ -132,7 +134,7 @@ const ProfileScreen = () => {
               <Ionicons 
                 name={activity.type === 'review' ? 'document-text' : 'person-add'} 
                 size={24} 
-                color="#BB9AF7" 
+                color={colors.primary} 
               />
               <View style={styles.activityContent}>
                 <Text style={styles.activityTitle}>
@@ -150,24 +152,16 @@ const ProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   scrollView: {
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    ...commonStyles.header
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#BB9AF7',
+    ...commonStyles.headerTitle
   },
   settingsButton: {
     padding: 8,
@@ -180,14 +174,14 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: '#414868',
+    backgroundColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
   avatarText: {
     fontSize: 40,
-    color: '#BB9AF7',
+    color: colors.primary,
     fontWeight: 'bold',
   },
   avatarImage: {
@@ -197,18 +191,18 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 24,
-    color: '#C0CAF5',
+    color: colors.textPrimary,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   userEmail: {
     fontSize: 16,
-    color: '#7AA2F7',
+    color: colors.secondary,
     marginBottom: 4,
   },
   joinDate: {
     fontSize: 14,
-    color: '#565F89',
+    color: colors.textSecondary,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -216,36 +210,33 @@ const styles = StyleSheet.create({
     padding: 20,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: '#414868',
+    borderColor: colors.border,
   },
   statItem: {
     alignItems: 'center',
   },
   statNumber: {
     fontSize: 24,
-    color: '#BB9AF7',
+    color: colors.primary,
     fontWeight: 'bold',
   },
   statLabel: {
     fontSize: 14,
-    color: '#565F89',
+    color: colors.textSecondary,
     marginTop: 4,
   },
   activityContainer: {
     padding: 20,
   },
   sectionTitle: {
-    fontSize: 20,
-    color: '#BB9AF7',
-    fontWeight: '600',
-    marginBottom: 16,
+    ...commonStyles.sectionTitle
   },
   activityItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    borderBottomColor: colors.border,
   },
   activityContent: {
     marginLeft: 12,
@@ -253,38 +244,25 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 16,
-    color: '#C0CAF5',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   activityDate: {
     fontSize: 14,
-    color: '#565F89',
+    color: colors.textSecondary,
   },
   modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
+    ...commonStyles.modalOverlay
   },
   modalContent: {
-    backgroundColor: '#1E1E2E',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
+    ...commonStyles.modalContent,
     minHeight: 200,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-    paddingBottom: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    ...commonStyles.modalHeader
   },
   modalTitle: {
-    fontSize: 20,
-    color: '#BB9AF7',
-    fontWeight: 'bold',
+    ...commonStyles.modalTitle
   },
   closeButton: {
     padding: 5,
@@ -293,12 +271,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: 'rgba(247, 118, 142, 0.1)',
+    backgroundColor: colors.tertiaryLight,
     borderRadius: 12,
     gap: 10,
   },
   logoutText: {
-    color: '#F7768E',
+    color: colors.tertiary,
     fontSize: 16,
     fontWeight: '600',
   },

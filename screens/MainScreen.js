@@ -6,8 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spotifyService } from '../services/spotifyService';
 import RenderAlbumCard from '../components/RenderAlbumCard';
 import SearchModal from '../components/SearchModal';
+import { colors, commonStyles } from '../theme';
 
-const MainScreen = ({ navigation }) => {  // Get navigation from props directly
+const MainScreen = ({ navigation }) => {  
   const [albums, setAlbums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
@@ -47,7 +48,7 @@ const MainScreen = ({ navigation }) => {  // Get navigation from props directly
       <View style={styles.header}>
         <Text style={styles.headerTitle}>MusicDiary</Text>
         <Pressable onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
-          <Ionicons name="search" size={24} color="#BB9AF7" />
+          <Ionicons name="search" size={24} color={colors.primary} />
         </Pressable>
       </View>
       
@@ -56,7 +57,7 @@ const MainScreen = ({ navigation }) => {  // Get navigation from props directly
       <SearchModal 
         visible={isSearchVisible}
         onClose={() => setIsSearchVisible(false)}
-        navigation={navigation}  // Pass navigation prop
+        navigation={navigation}
       />
 
       <ScrollView 
@@ -85,46 +86,25 @@ const MainScreen = ({ navigation }) => {  // Get navigation from props directly
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#1E1E2E',
+    ...commonStyles.container
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    ...commonStyles.header
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#BB9AF7',
+    ...commonStyles.headerTitle
   },
   searchButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
-    borderRadius: 20,
+    ...commonStyles.iconButton
   },
   subtitle: {
-    fontSize: 18,
-    color: '#BB9AF7',
-    marginLeft: 20,
-    marginTop: 10,
-    marginBottom: 5,
+    ...commonStyles.subtitle
   },
   content: {
-    flex: 1,
+    ...commonStyles.content
   },
   gridContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 5,
-    justifyContent: 'center',
-    paddingTop:10
+    ...commonStyles.gridContainer
   },
   albumCard: {
     width: 115,
@@ -137,14 +117,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   skeletonCard: {
-    backgroundColor: 'rgba(187, 154, 247, 0.02)',
+    backgroundColor: colors.primaryLight,
   },
   skeletonImage: {
-    backgroundColor: '#2E2E3E',
+    backgroundColor: colors.skeleton,
   },
   skeletonText: {
     height: 16,
-    backgroundColor: '#2E2E3E',
+    backgroundColor: colors.skeleton,
     borderRadius: 4,
     marginVertical: 4,
   },

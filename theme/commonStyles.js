@@ -32,6 +32,12 @@ export const commonStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.primary,
   },
+  headerButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
   
   // Icon button
   iconButton: {
@@ -115,6 +121,14 @@ export const commonStyles = StyleSheet.create({
   },
   
   // Stat items
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginBottom: 30,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -172,5 +186,32 @@ export const commonStyles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors.skeleton,
     marginBottom: 10,
+  },
+  
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: colors.overlay,
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    color: colors.primary,
+    fontWeight: 'bold',
   },
 });
