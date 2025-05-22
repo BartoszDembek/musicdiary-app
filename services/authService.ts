@@ -1,5 +1,5 @@
 import axios from 'axios';
-const API_URL = 'https://musicdiary-backend-puce.vercel.app'
+import { API_URL } from '../config/api';
 
 export const authService = {
     register: async (userData) => {
@@ -19,6 +19,8 @@ export const authService = {
 
     login: async(userData) => {
       try {
+        const url = `${API_URL}/auth/login`;
+        console.log('Sending request to:', url);
         const response = await axios.post(`${API_URL}/auth/login`, userData);
         return response.data;
       } catch (error) {

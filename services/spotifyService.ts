@@ -1,5 +1,6 @@
 import axios from 'axios';
-const API_URL = 'https://musicdiary-backend-puce.vercel.app'
+import { API_URL } from '../config/api';
+
 export const spotifyService = {
     loadAlbums: async () => {
       try {
