@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { API_URL } from '../config/api';
 
+const API_URL = process.env.EXPO_PUBLIC_API_URL
 
 export const followService = {
     followArtist: async (userId: string, artistId: string) => {
