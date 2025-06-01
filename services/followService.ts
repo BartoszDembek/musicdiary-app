@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app"
 
 export const followService = {
     followArtist: async (userId: string, artistId: string) => {
         try {
-            const response = await axios.post(`${API_URL}/follows/follow-artist/${userId}?artistId=${artistId}`);
+            const response = await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/follows/follow-artist/${userId}?artistId=${artistId}`);
             return response.data;
         } catch (error) {
             if (error.response) {
@@ -20,7 +20,7 @@ export const followService = {
 
     unfollowArtist: async (userId: string, artistId: string) => {
         try {
-            const response = await axios.post(`${API_URL}/follows/unfollow-artist/${userId}?artistId=${artistId}`);
+            const response = await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/follows/unfollow-artist/${userId}?artistId=${artistId}`);
             return response.data;
         } catch (error) {
             if (error.response) {

@@ -1,10 +1,10 @@
 import axios from 'axios';
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app"
 
 export const spotifyService = {
     loadAlbums: async () => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/newReleases`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/newReleases`);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -18,7 +18,7 @@ export const spotifyService = {
     },
     getAlbumByID: async (id) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/album/${id}`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/album/${id}`);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -32,7 +32,7 @@ export const spotifyService = {
     },
     getArtistByID: async (id) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/artist/${id}`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/artist/${id}`);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -46,7 +46,7 @@ export const spotifyService = {
     },
     getArtistAlbums: async (id) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/artist/${id}/albums`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/artist/${id}/albums`);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -60,7 +60,7 @@ export const spotifyService = {
     },
     getArtistTopTracks: async (id) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/artist/${id}/top-tracks`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/artist/${id}/top-tracks`);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -74,7 +74,7 @@ export const spotifyService = {
     },
     search: async (query) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/search`, {
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/search`, {
           params: {query:query},
         });
         return response.data;
@@ -90,7 +90,7 @@ export const spotifyService = {
     },
     getTrackByID: async (id) => {
       try {
-        const response = await axios.get(`${API_URL}/spotify/track/${id}`);
+        const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/spotify/track/${id}`);
         return response.data;
       } catch (error) {
         if (error.response) {

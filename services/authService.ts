@@ -1,11 +1,11 @@
 import axios from 'axios';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app"
 
 export const authService = {
     register: async (userData) => {
       try {
-        const response = await axios.post(`${API_URL}/auth/register`, userData);
+        const response = await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/auth/register`, userData);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -20,9 +20,9 @@ export const authService = {
 
     login: async(userData) => {
       try {
-        const url = `${API_URL}/auth/login`;
+        const url = `https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/auth/login`;
         console.log('Sending request to:', url);
-        const response = await axios.post(`${API_URL}/auth/login`, userData);
+        const response = await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/auth/login`, userData);
         return response.data;
       } catch (error) {
         if (error.response) {
@@ -37,7 +37,7 @@ export const authService = {
 
     resendVerificationEmail: async(email:string) => {
       try {
-        await axios.post(`${API_URL}/auth/resend`, email);
+        await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/auth/resend`, email);
       } catch (error) {
         if (error.response) {
           throw new Error(error.response.data.message || '');

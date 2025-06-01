@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app"
 
 
 export const reviewService = {
@@ -11,7 +11,7 @@ export const reviewService = {
       // await AsyncStorage.setItem(key, JSON.stringify(review));
       // return true;
 
-      const response = await axios.post(`${API_URL}/review/${userId}`, {
+      const response = await axios.post(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/review/${userId}`, {
         spotifyId:spotifyId,text:text,types:types,rating:rating
       });
 
@@ -35,7 +35,7 @@ export const reviewService = {
 
   getReviewsBySpotifyId: async (spotifyId, type) => {
     try {
-      const response = await axios.get(`${API_URL}/review/${spotifyId}?type=${type}`);
+      const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/review/${spotifyId}?type=${type}`);
       return response.data;
     } catch (error) {
       console.error('Error getting reviews:', error);

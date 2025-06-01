@@ -1,10 +1,10 @@
 import axios from 'axios';
-const API_URL = process.env.EXPO_PUBLIC_API_URL
+const API_URL = "https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app"
 
 export const userService = {
     getUserProfile: async (userId) => {
         try {
-            const response = await axios.get(`${API_URL}/user/${userId}`);
+            const response = await axios.get(`https://musicdiary-backend-git-dev-sh8drs-projects.vercel.app/user/${userId}`);
             return response.data;
         } catch (error) {
             if (error.response) {
