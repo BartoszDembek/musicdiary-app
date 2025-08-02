@@ -110,13 +110,16 @@ const ArtistScreen = ({ route }) => {
             <View style={styles.rightButtons}>
               <Pressable 
                 onPress={handleFollow} 
-                style={[styles.iconButton, isFollowed && styles.followingButton]}
+                style={[styles.followButton, isFollowed && styles.followingButton]}
               >
                 <Ionicons 
-                  name={isFollowed ? "heart" : "heart-outline"} 
-                  size={24} 
-                  color={colors.primary} 
+                  name={isFollowed ? "checkmark" : "add"} 
+                  size={18} 
+                  color={isFollowed ? colors.primary : colors.background} 
                 />
+                <Text style={[styles.followButtonText, isFollowed && styles.followingText]}>
+                  {isFollowed ? "Following" : "Follow"}
+                </Text>
               </Pressable>
               <Pressable onPress={openInSpotify} style={styles.iconButton}>
                 <Entypo name="spotify" size={24} color={colors.spotify} />
@@ -160,8 +163,25 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
   },
+  followButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
   followingButton: {
-    backgroundColor: colors.primaryMedium,
+    backgroundColor: colors.surface,
+  },
+  followButtonText: {
+    color: colors.background,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  followingText: {
+    color: colors.primary,
   },
   artistImage: {
     width: '100%',
