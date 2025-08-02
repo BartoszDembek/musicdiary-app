@@ -4,6 +4,8 @@ import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
+import { favoriteService } from '../services/favoriteService';
+import { userService } from '../services/userService';
 import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
 import AverageRating from '../components/AverageRating';
@@ -11,13 +13,24 @@ import { reviewService } from '../services/reviewService';
 import { colors, commonStyles } from '../theme';
 
 const AlbumScreen = ({ route }) => {
-  const { user } = useAuth();
+  const { userProfile, user, updateUserProfile } = useAuth();
   const { albumId } = route.params;
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
   const navigation = useNavigation();
+
+  const checkIfFavorite = () => {
+    console.log('Checking if album is favorite:', userProfile?.favorites);
+    if (userProfile?.favorites?.[0]?.favorite) {
+      const isAlbumFavorited = userProfile.favorites[0].favorite.includes(albumId);
+      setIsFavorite(isAlbumFavorited);
+    } else {
+      setIsFavorite(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -29,6 +42,7 @@ const AlbumScreen = ({ route }) => {
       setAlbum(albumData);
       setReviews(reviewsData || []);
       setAverageRating(reviewService.calculateAverageRating(reviewsData));
+      checkIfFavorite();
     } catch (error) {
       Alert.alert("Error", "Failed to load album data");
     } finally {
@@ -39,6 +53,29 @@ const AlbumScreen = ({ route }) => {
   const openInSpotify = () => {
     if (album?.external_urls?.spotify) {
       Linking.openURL(album.external_urls.spotify);
+    }
+  };
+
+  const handleFavorite = async () => {
+    setIsFavorite(!isFavorite);
+    try {
+      let updatedProfile;
+      if (isFavorite) {
+        updatedProfile = await favoriteService.removeFavorite(user.id, albumId);
+      } else {
+        updatedProfile = await favoriteService.addFavorite(user.id, albumId);
+      }
+          
+      if (updatedProfile) {
+        // Fetch fresh user profile data
+        const freshProfileData = await userService.getUserProfile(user.id);
+        if (freshProfileData && freshProfileData[0]) {
+          await updateUserProfile(freshProfileData[0]);
+          setIsFavorite(!isFavorite);
+        }
+      }
+    } catch (error) {
+      Alert.alert("Error", isFavorite ? "Failed to remove from favorites" : "Failed to add to favorites");
     }
   };
 
@@ -79,9 +116,18 @@ const AlbumScreen = ({ route }) => {
               <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
                 <Ionicons name="arrow-back" size={24} color={colors.primary} />
               </Pressable>
-              <Pressable onPress={openInSpotify} style={styles.iconButton}>
-                <Entypo name="spotify" size={24} color={colors.spotify} />
-              </Pressable>
+              <View style={styles.rightButtons}>
+                <Pressable onPress={handleFavorite} style={styles.iconButton}>
+                  <Ionicons 
+                    name={isFavorite ? "heart" : "heart-outline"} 
+                    size={24} 
+                    color={isFavorite ? colors.tertiary : colors.primary} 
+                  />
+                </Pressable>
+                <Pressable onPress={openInSpotify} style={styles.iconButton}>
+                  <Entypo name="spotify" size={24} color={colors.spotify} />
+                </Pressable>
+              </View>
             </View>
           </View>
 
@@ -154,6 +200,10 @@ const styles = StyleSheet.create({
   },
   iconButton: {
     ...commonStyles.iconButton
+  },
+  rightButtons: {
+    flexDirection: 'row',
+    gap: 10,
   },
   albumImage: {
     width: '100%',

@@ -48,6 +48,14 @@ const ProfileScreen = () => {
     return userProfile?.reviews ? userProfile.reviews.length : 0;
   };
 
+  const getFavoritesCount = () => {
+    if (!userProfile?.favorites || !userProfile.favorites[0]) {
+      return 0;
+    }
+    return Array.isArray(userProfile.favorites[0].favorite) ? userProfile.favorites[0].favorite.length : 0;
+
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -124,7 +132,7 @@ const ProfileScreen = () => {
             <Text style={styles.statLabel}>Following</Text>
           </View>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{mockUserData.stats.favoriteTracks}</Text>
+            <Text style={styles.statNumber}>{getFavoritesCount()}</Text>
             <Text style={styles.statLabel}>Favorites</Text>
           </View>
         </View>
