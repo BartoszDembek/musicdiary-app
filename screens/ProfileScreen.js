@@ -36,13 +36,16 @@ const ProfileScreen = () => {
     setIsSettingsVisible(false);
   };
 
-  // Add null check for follows array
   const getFollowsCount = () => {
-    console.log('User Profile:', userProfile['follows']); // Debugging line
     if (!userProfile?.follows || !userProfile.follows[0]) {
       return 0;
     }
     return Array.isArray(userProfile.follows[0].follow) ? userProfile.follows[0].follow.length : 0;
+    
+  };
+
+  const getReviewsCount = () => {
+    return userProfile?.reviews ? userProfile.reviews.length : 0;
   };
 
   return (
@@ -113,7 +116,7 @@ const ProfileScreen = () => {
         {/* Stats */}
         <View style={styles.statsContainer}>
           <View style={styles.statItem}>
-            <Text style={styles.statNumber}>{mockUserData.stats.albumsReviewed}</Text>
+            <Text style={styles.statNumber}>{getReviewsCount()}</Text>
             <Text style={styles.statLabel}>Reviews</Text>
           </View>
           <View style={styles.statItem}>
