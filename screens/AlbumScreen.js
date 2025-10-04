@@ -24,8 +24,8 @@ const AlbumScreen = ({ route }) => {
 
   const checkIfFavorite = () => {
     console.log('Checking if album is favorite:', userProfile?.favorites);
-    if (userProfile?.favorites?.[0]?.favorite) {
-      const isAlbumFavorited = userProfile.favorites[0].favorite.includes(albumId);
+    if (userProfile?.favorites?.[0]?.favorite && Array.isArray(userProfile.favorites[0].favorite)) {
+      const isAlbumFavorited = userProfile.favorites[0].favorite.some(item => item.id === albumId);
       setIsFavorite(isAlbumFavorited);
     } else {
       setIsFavorite(false);

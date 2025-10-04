@@ -24,8 +24,8 @@ const ArtistScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const checkIfFollowed = () => {
-    if (userProfile?.follows?.[0]?.follow) {
-      const isArtistFollowed = userProfile.follows[0].follow.includes(artistId);
+    if (userProfile?.follows?.[0]?.follow && Array.isArray(userProfile.follows[0].follow)) {
+      const isArtistFollowed = userProfile.follows[0].follow.some(item => item.id === artistId);
       setIsFollowed(isArtistFollowed);
     } else {
       setIsFollowed(false);
