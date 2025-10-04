@@ -29,7 +29,6 @@ const ProfileScreen = () => {
       return 0;
     }
     return Array.isArray(userProfile.follows[0].follow) ? userProfile.follows[0].follow.length : 0;
-    
   };
 
   const getReviewsCount = () => {
@@ -42,7 +41,6 @@ const ProfileScreen = () => {
       return 0;
     }
     return Array.isArray(userProfile.favorites[0].favorite) ? userProfile.favorites[0].favorite.length : 0;
-
   };
 
   return (

@@ -48,7 +48,7 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
         activities.push({
           type: 'follow',
           data: follow,
-          created_at: follow.created_at,
+          created_at: follow.createdAt,
           title: `Following ${follow.artist_name || 'an artist'}`,
           subtitle: 'Artist'
         });
@@ -61,18 +61,20 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
         activities.push({
           type: 'favorite',
           data: favorite,
-          created_at: favorite.created_at,
+          created_at: favorite.createdAt,
           title: `Added to favorites: ${favorite.track_name || favorite.album_name || 'item'}`,
           subtitle: favorite.artist_name || 'Unknown artist'
         });
       });
     }
 
+    console.log('All activities:', activities);
+
     // Sort by created_at (newest first)
     return activities
       .filter(activity => activity.created_at)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 10); // Show only latest 10 activities
+      .slice(0, 5); // Show only latest 10 activities
   };
 
   const getIconName = (type) => {
