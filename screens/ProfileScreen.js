@@ -4,19 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { colors, commonStyles } from '../theme';
-
-const mockUserData = {
-  stats: {
-    albumsReviewed: 42,
-    artistsFollowed: 15,
-    favoriteTracks: 128
-  },
-  recentActivity: [
-    { type: 'review', album: 'Random Access Memories', artist: 'Daft Punk', date: '2 days ago' },
-    { type: 'follow', artist: 'The Weeknd', date: '5 days ago' },
-    { type: 'review', album: 'Dawn FM', artist: 'The Weeknd', date: 'a week ago' },
-  ]
-};
+import RecentActivity from '../components/RecentActivity';
 
 const ProfileScreen = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
@@ -45,6 +33,7 @@ const ProfileScreen = () => {
   };
 
   const getReviewsCount = () => {
+    console.log(userProfile?.reviews);
     return userProfile?.reviews ? userProfile.reviews.length : 0;
   };
 
@@ -137,25 +126,12 @@ const ProfileScreen = () => {
           </View>
         </View>
 
-        {/* Recent Activity - using mockUserData */}
-        <View style={styles.activityContainer}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          {mockUserData.recentActivity.map((activity, index) => (
-            <View key={index} style={styles.activityItem}>
-              <Ionicons 
-                name={activity.type === 'review' ? 'document-text' : 'person-add'} 
-                size={24} 
-                color={colors.primary} 
-              />
-              <View style={styles.activityContent}>
-                <Text style={styles.activityTitle}>
-                  {activity.type === 'review' ? `Reviewed ${activity.album}` : `Following ${activity.artist}`}
-                </Text>
-                <Text style={styles.activityDate}>{activity.date}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
+        {/* Recent Activity */}
+        <RecentActivity 
+          follows={userProfile?.follows}
+          reviews={userProfile?.reviews}
+          favorites={userProfile?.favorites}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -235,32 +211,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
-  },
-  activityContainer: {
-    padding: 20,
-  },
-  sectionTitle: {
-    ...commonStyles.sectionTitle
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  activityContent: {
-    marginLeft: 12,
-    flex: 1,
-  },
-  activityTitle: {
-    fontSize: 16,
-    color: colors.textPrimary,
-    marginBottom: 4,
-  },
-  activityDate: {
-    fontSize: 14,
-    color: colors.textSecondary,
   },
   modalOverlay: {
     ...commonStyles.modalOverlay
