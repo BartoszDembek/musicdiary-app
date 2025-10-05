@@ -2,9 +2,12 @@ import axios from 'axios';
 const API_URL = 'https://musicdiary-backend-puce.vercel.app'
 
 export const followService = {
-    followArtist: async (userId: string, artistId: string) => {
+    followArtist: async (userId: string, artistId: string, artistName?: string) => {
         try {
-            const response = await axios.post(`${API_URL}/follows/follow-artist/${userId}?artistId=${artistId}`);
+            const url = `${API_URL}/follows/follow-artist/${userId}?artistId=${artistId}`;
+            const body: { artistName?: string } = {};
+            if (artistName) body.artistName = artistName;
+            const response = await axios.post(url, body);
             return response.data;
         } catch (error) {
             if (error.response) {

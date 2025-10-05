@@ -60,10 +60,11 @@ const ArtistScreen = ({ route }) => {
   const handleFollow = async () => {
     try {
       let updatedProfile;
+      const artistName = artist.name;
       if (isFollowed) {
         updatedProfile = await followService.unfollowArtist(user.id, artistId);
       } else {
-        updatedProfile = await followService.followArtist(user.id, artistId);
+        updatedProfile = await followService.followArtist(user.id, artistId, artistName);
       }
       
       if (updatedProfile) {
