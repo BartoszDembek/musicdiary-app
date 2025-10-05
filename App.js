@@ -12,6 +12,7 @@ import AlbumScreen from './screens/AlbumScreen';
 import ArtistScreen from './screens/ArtistScreen';
 import { Ionicons } from '@expo/vector-icons';
 import ProfileScreen from './screens/ProfileScreen';
+import FeaturedReviewsScreen from './screens/FeaturedReviewsScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import TrackScreen from './screens/TrackScreen';
 
@@ -38,13 +39,21 @@ function TabNavigator() {
         tabBarStyle: styles.screen,
         tabBarActiveTintColor: '#BB9AF7',
         tabBarIcon: ({ color, size }) => {
-          let iconName = route.name === 'Home' ? 'grid' : 'person';
+          let iconName;
+          if (route.name === 'Home') {
+            iconName = 'grid';
+          } else if (route.name === 'Reviews') {
+            iconName = 'chatbubbles';
+          } else {
+            iconName = 'person';
+          }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
         tabBarShowLabel: false,
       })}
     >
       <Tab.Screen name="Home" component={HomeStack} />
+      <Tab.Screen name="Reviews" component={FeaturedReviewsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

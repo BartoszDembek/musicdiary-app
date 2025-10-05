@@ -46,5 +46,15 @@ export const reviewService = {
     if (!reviews || reviews.length === 0) return 0;
     const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
     return Math.round((sum / reviews.length) * 10) / 10;
+  },
+
+  getFeaturedReviews: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/reviews/featured`);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting featured reviews:', error);
+      return [];
+    }
   }
 };
