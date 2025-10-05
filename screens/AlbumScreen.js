@@ -60,10 +60,12 @@ const AlbumScreen = ({ route }) => {
     setIsFavorite(!isFavorite);
     try {
       let updatedProfile;
+      const artistName = album.artists.map(artist => artist.name).join(', ');
+      const albumName = album.name;
       if (isFavorite) {
         updatedProfile = await favoriteService.removeFavorite(user.id, albumId);
       } else {
-        updatedProfile = await favoriteService.addFavorite(user.id, albumId);
+        updatedProfile = await favoriteService.addFavorite(user.id, albumId, artistName, albumName);
       }
           
       if (updatedProfile) {

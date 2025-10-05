@@ -62,7 +62,7 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
           type: 'favorite',
           data: favorite,
           created_at: favorite.createdAt,
-          title: `Added to favorites: ${favorite.track_name || favorite.album_name || 'item'}`,
+          title: `Added to favorites: ${favorite.item_name || 'item'}`,
           subtitle: favorite.artist_name || 'Unknown artist'
         });
       });
