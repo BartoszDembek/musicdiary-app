@@ -52,12 +52,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUserProfile = async (profileData) => {
+  const updateUserProfile = async (profileData = null) => {
     try {
-      await AsyncStorage.setItem('userProfile', JSON.stringify(profileData));
-      setUserProfile(profileData);
+      if (profileData) {
+        // If profileData is provided, use it directly
+        await AsyncStorage.setItem('userProfile', JSON.stringify(profileData));
+        setUserProfile(profileData);
+      } else {
+        // If no profileData provided, fetch from server
+        if (user?.id) {
+          const freshProfileData = await userService.getUserProfile(user.id);
+          if (freshProfileData && freshProfileData[0]) {
+            await AsyncStorage.setItem('userProfile', JSON.stringify(freshProfileData[0]));
+            setUserProfile(freshProfileData[0]);
+          }
+        }
+      }
     } catch (error) {
-      console.error('Error storing profile data:', error);
+      console.error('Error updating profile data:', error);
+      throw error;
     }
   };
 

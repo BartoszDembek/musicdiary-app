@@ -15,6 +15,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import FeaturedReviewsScreen from './screens/FeaturedReviewsScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import TrackScreen from './screens/TrackScreen';
+import EditProfileScreen from './screens/EditProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -75,7 +76,10 @@ function Navigation() {
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {userToken ? (
           // Authenticated stack
-          <Stack.Screen name="MainTabs" component={TabNavigator} />
+          <>
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          </>
         ) : (
           // Non-authenticated stack
           <>

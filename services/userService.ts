@@ -15,5 +15,20 @@ export const userService = {
               throw new Error('Request failed');
             }
         }
+    },
+
+    updateProfile: async (profileData) => {
+        try {
+            const response = await axios.put(`${API_URL}/user/profile`, profileData);
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+              throw new Error(error.response.data.message || 'Failed to update profile');
+            } else if (error.request) {
+              throw new Error('No response from server');
+            } else {
+              throw new Error('Request failed');
+            }
+        }
     }
 };

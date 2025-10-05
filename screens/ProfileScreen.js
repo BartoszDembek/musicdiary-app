@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { colors, commonStyles } from '../theme';
@@ -9,6 +10,7 @@ import RecentActivity from '../components/RecentActivity';
 const ProfileScreen = () => {
   const [isSettingsVisible, setIsSettingsVisible] = useState(false);
   const { signOut, user, userProfile } = useAuth();
+  const navigation = useNavigation();
 
   const formatJoinDate = (dateString) => {
     const date = new Date(dateString);
@@ -75,6 +77,17 @@ const ProfileScreen = () => {
                   <Ionicons name="close" size={24} color={colors.primary} />
                 </Pressable>
               </View>
+
+              <Pressable 
+                style={styles.editProfileButton}
+                onPress={() => {
+                  setIsSettingsVisible(false);
+                  navigation.navigate('EditProfile');
+                }}
+              >
+                <Ionicons name="person-outline" size={24} color={colors.primary} />
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </Pressable>
 
               <Pressable 
                 style={styles.logoutButton}
@@ -225,6 +238,22 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     padding: 5,
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    gap: 10,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  editProfileText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
   },
   logoutButton: {
     flexDirection: 'row',
