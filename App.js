@@ -4,7 +4,7 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import EmailVerificationScreen from './screens/EmailVerificationScreen';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MainScreen from './screens/MainScreen';
@@ -95,12 +95,12 @@ function Navigation() {
 
 export default function App() {
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaView  style={styles.container}>
       <StatusBar style="light" backgroundColor="#1E1E2E" />
       <AuthProvider>
         <Navigation />
       </AuthProvider>
-    </SafeAreaProvider>
+    </SafeAreaView>
   );
 }
 

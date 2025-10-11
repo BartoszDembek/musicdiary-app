@@ -19,7 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.sh8dr.musicdiaryapp"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -27,6 +28,12 @@
     "plugins": [
       "expo-router",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5bd80845-9636-4319-9160-5ca72cd460dd"
+      }
+    }
   }
 }
