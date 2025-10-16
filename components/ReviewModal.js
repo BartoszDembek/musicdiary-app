@@ -16,7 +16,7 @@ const ReviewModal = ({ visible, onClose, rating, setRating, review, setReview, o
       }}>
         <View style={styles.overlay}>
           <KeyboardAvoidingView 
-            behavior={Platform.OS === "ios" ? "padding" : null}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={styles.modalContainer}
             keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
           >
@@ -80,13 +80,15 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     justifyContent: 'flex-end',
+    flex: Platform.OS === 'android' ? 1 : undefined,
   },
   modalContent: {
     backgroundColor: '#1E1E2E',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    maxHeight: '90%',
+    maxHeight: Platform.OS === 'android' ? '95%' : '90%',
+    minHeight: Platform.OS === 'android' ? 300 : undefined,
   },
   dragIndicator: {
     width: 40,
