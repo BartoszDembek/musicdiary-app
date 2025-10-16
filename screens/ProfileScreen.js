@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -65,6 +65,7 @@ const ProfileScreen = () => {
           transparent={true}
           animationType="slide"
           onRequestClose={() => setIsSettingsVisible(false)}
+          statusBarTranslucent={true}
         >
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
@@ -224,11 +225,22 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   modalOverlay: {
-    ...commonStyles.modalOverlay
+    ...commonStyles.modalOverlay,
+    zIndex: 9999,
+    elevation: 9999,
+    justifyContent: 'flex-end',
+    paddingBottom: Platform.OS === 'android' ? 60 : 0,
   },
   modalContent: {
     ...commonStyles.modalContent,
     minHeight: 200,
+    zIndex: 10000,
+    elevation: 10000,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    maxHeight: '60%',
   },
   modalHeader: {
     ...commonStyles.modalHeader
