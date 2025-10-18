@@ -17,9 +17,9 @@ export const userService = {
         }
     },
 
-    updateProfile: async (profileData) => {
+    updateProfile: async (userId, profileData) => {
         try {
-            const response = await axios.put(`${API_URL}/user/profile`, profileData);
+            const response = await axios.put(`${API_URL}/user/${userId}`, profileData);
             return response.data;
         } catch (error) {
             if (error.response) {
