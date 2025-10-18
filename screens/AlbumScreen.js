@@ -23,7 +23,6 @@ const AlbumScreen = ({ route }) => {
   const navigation = useNavigation();
 
   const checkIfFavorite = () => {
-    console.log('Checking if album is favorite:', userProfile?.favorites);
     if (userProfile?.favorites?.[0]?.favorite && Array.isArray(userProfile.favorites[0].favorite)) {
       const isAlbumFavorited = userProfile.favorites[0].favorite.some(item => item.id === albumId);
       setIsFavorite(isAlbumFavorited);
@@ -179,7 +178,13 @@ const AlbumScreen = ({ route }) => {
               </View>
             </View>
 
-            <ReviewSection userId={user?.id} itemId={albumId} type="album" />
+            <ReviewSection 
+              userId={user?.id} 
+              itemId={albumId} 
+              type="album" 
+              artistName={album.artists.map(artist => artist.name).join(', ')}
+              itemName={album.name}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

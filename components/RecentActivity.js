@@ -68,8 +68,6 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
       });
     }
 
-    console.log('All activities:', activities);
-
     // Sort by created_at (newest first)
     return activities
       .filter(activity => activity.created_at)

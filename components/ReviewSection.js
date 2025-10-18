@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewService } from '../services/reviewService';
+import { userService } from '../services/userService';
+import { useAuth } from '../context/AuthContext';
 import ReviewModal from './ReviewModal';
 
 const ReviewItem = ({ review, isUserReview, onEdit }) => (
@@ -30,12 +32,13 @@ const ReviewItem = ({ review, isUserReview, onEdit }) => (
   </View>
 );
 
-const ReviewSection = ({ userId, itemId, type }) => {
+const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
   const [userReview, setUserReview] = useState(null);
   const [allReviews, setAllReviews] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
+  const { user, updateUserProfile } = useAuth();
 
   useEffect(() => {
     loadReviews();
@@ -56,9 +59,21 @@ const ReviewSection = ({ userId, itemId, type }) => {
   };
 
   const handleSave = async () => {
-    await reviewService.saveReview(userId, itemId, review, type, rating);
-    setIsModalVisible(false);
-    loadReviews(); // Reload reviews after saving
+    try {
+      await reviewService.saveReview(userId, itemId, review, type, rating, artistName, itemName);
+      setIsModalVisible(false);
+      loadReviews(); // Reload reviews after saving
+      
+      // Update user profile after saving review
+      if (user?.id) {
+        const freshProfileData = await userService.getUserProfile(user.id);
+        if (freshProfileData && freshProfileData[0]) {
+          await updateUserProfile(freshProfileData[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving review:', error);
+    }
   };
 
   return (

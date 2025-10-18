@@ -184,7 +184,13 @@ const TrackScreen = ({ route }) => {
               )}
             </View>
 
-            <ReviewSection userId={user?.id} itemId={trackId} type="song" />
+            <ReviewSection 
+              userId={user?.id} 
+              itemId={trackId} 
+              type="song" 
+              artistName={track.artists.map(artist => artist.name).join(', ')}
+              itemName={track.name}
+            />
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

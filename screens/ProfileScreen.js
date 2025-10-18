@@ -34,7 +34,6 @@ const ProfileScreen = () => {
   };
 
   const getReviewsCount = () => {
-    console.log(userProfile?.reviews);
     return userProfile?.reviews ? userProfile.reviews.length : 0;
   };
 

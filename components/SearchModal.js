@@ -64,8 +64,6 @@ const SearchModal = ({ visible, onClose, navigation }) => {
       console.error('No item ID found:', item);
       return;
     }
-
-    console.log(`Navigating to ${type}:`, item.id);
     
     try {
       setSearchQuery('');
@@ -120,7 +118,6 @@ const SearchModal = ({ visible, onClose, navigation }) => {
       <TouchableOpacity 
         style={styles.resultItem}
         onPress={() => {
-          console.log('Item pressed:', type, item.id);
           handleItemPress(item, type);
         }}
       >
