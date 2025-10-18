@@ -180,6 +180,7 @@ const RegisterScreen = ({navigation}) => {
       email,
       username,
       password,
+      avatar: avatar || null,
     };
     
     try {
@@ -189,9 +190,6 @@ const RegisterScreen = ({navigation}) => {
         password,
       });
       await signIn(loginResponse.token, loginResponse.user);
-      
-      // If avatar was selected, we could update it here
-      // For now, we'll skip avatar implementation as it requires userService update
       
     } catch (error) {
       console.log(error)
