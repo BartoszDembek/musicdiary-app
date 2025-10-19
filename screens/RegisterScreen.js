@@ -17,6 +17,7 @@ import { Link } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { authService } from '../services/authService';
+import useImagePicker from '../components/ImagePicker';
 import Header from '../components/Auth/Header';
 import { Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -39,6 +40,7 @@ const RegisterScreen = ({navigation}) => {
   const [avatar, setAvatar] = useState('');
   
   const { signIn } = useAuth();
+  const { showImagePicker } = useImagePicker();
 
   // Step validation functions
   const validateStep1 = () => {
@@ -93,84 +95,9 @@ const RegisterScreen = ({navigation}) => {
     handleRegister();
   };
 
-  // Avatar selection functions
-  const pickImage = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (permissionResult.granted === false) {
-        Alert.alert('Permission Required', 'Permission to access camera roll is required!');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.3,
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const base64Data = result.assets[0].base64;
-        
-        if (base64Data.length > 700000) {
-          Alert.alert('Image Too Large', 'Please select a smaller image. The image should be less than 500KB.');
-          return;
-        }
-        
-        const base64String = `data:image/jpeg;base64,${base64Data}`;
-        setAvatar(base64String);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
-    }
-  };
-
-  const takePicture = async () => {
-    try {
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (permissionResult.granted === false) {
-        Alert.alert('Permission Required', 'Permission to access camera is required!');
-        return;
-      }
-
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.3,
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const base64Data = result.assets[0].base64;
-        
-        if (base64Data.length > 700000) {
-          Alert.alert('Image Too Large', 'The captured image is too large. Please try again or select a different image.');
-          return;
-        }
-        
-        const base64String = `data:image/jpeg;base64,${base64Data}`;
-        setAvatar(base64String);
-      }
-    } catch (error) {
-      console.error('Error taking picture:', error);
-      Alert.alert('Error', 'Failed to take picture. Please try again.');
-    }
-  };
-
-  const showImagePicker = () => {
-    Alert.alert(
-      'Select Photo',
-      'Choose how you want to add your photo',
-      [
-        { text: 'Camera', onPress: takePicture },
-        { text: 'Photo Library', onPress: pickImage },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
+  // Avatar selection handler
+  const handleImageSelect = (base64String) => {
+    setAvatar(base64String);
   };
 
   const handleRegister = async () => {
@@ -337,7 +264,7 @@ const RegisterScreen = ({navigation}) => {
           )}
         </View>
         
-        <Pressable style={styles.changeAvatarButton} onPress={showImagePicker}>
+        <Pressable style={styles.changeAvatarButton} onPress={() => showImagePicker(handleImageSelect)}>
           <Ionicons name="camera-outline" size={20} color={colors.primary} />
           <Text style={styles.changeAvatarText}>
             {avatar ? 'Change Photo' : 'Add Photo'}

@@ -16,10 +16,12 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
+import useImagePicker from '../components/ImagePicker';
 import { colors, commonStyles } from '../theme';
 
 const EditProfileScreen = ({ navigation }) => {
   const { userProfile, updateUserProfile } = useAuth();
+  const { showImagePicker } = useImagePicker();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
@@ -76,89 +78,8 @@ const EditProfileScreen = ({ navigation }) => {
     navigation.goBack();
   };
 
-  const pickImage = async () => {
-    try {
-      // Request permission
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (permissionResult.granted === false) {
-        Alert.alert('Permission Required', 'Permission to access camera roll is required!');
-        return;
-      }
-
-      // Open image picker with lower quality and smaller size
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.3, // Reduced quality for smaller file size
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const base64Data = result.assets[0].base64;
-        
-        // Check if base64 string is too large (limit to ~500KB)
-        if (base64Data.length > 700000) {
-          Alert.alert('Image Too Large', 'Please select a smaller image. The image should be less than 500KB.');
-          return;
-        }
-        
-        const base64String = `data:image/jpeg;base64,${base64Data}`;
-        setFormData(prev => ({ ...prev, avatar: base64String }));
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image. Please try again.');
-    }
-  };
-
-  const takePicture = async () => {
-    try {
-      // Request permission
-      const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-      
-      if (permissionResult.granted === false) {
-        Alert.alert('Permission Required', 'Permission to access camera is required!');
-        return;
-      }
-
-      // Open camera with lower quality and smaller size
-      const result = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.3, // Reduced quality for smaller file size
-        base64: true,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        const base64Data = result.assets[0].base64;
-        
-        // Check if base64 string is too large (limit to ~500KB)
-        if (base64Data.length > 700000) {
-          Alert.alert('Image Too Large', 'The captured image is too large. Please try again or select a different image.');
-          return;
-        }
-        
-        const base64String = `data:image/jpeg;base64,${base64Data}`;
-        setFormData(prev => ({ ...prev, avatar: base64String }));
-      }
-    } catch (error) {
-      console.error('Error taking picture:', error);
-      Alert.alert('Error', 'Failed to take picture. Please try again.');
-    }
-  };
-
-  const showImagePicker = () => {
-    Alert.alert(
-      'Select Photo',
-      'Choose how you want to add your photo',
-      [
-        { text: 'Camera', onPress: takePicture },
-        { text: 'Photo Library', onPress: pickImage },
-        { text: 'Cancel', style: 'cancel' }
-      ]
-    );
+  const handleImageSelect = (base64String) => {
+    setFormData(prev => ({ ...prev, avatar: base64String }));
   };
 
   return (
@@ -200,7 +121,7 @@ const EditProfileScreen = ({ navigation }) => {
               </Text>
             )}
           </View>
-          <Pressable style={styles.changeAvatarButton} onPress={showImagePicker}>
+          <Pressable style={styles.changeAvatarButton} onPress={() => showImagePicker(handleImageSelect)}>
             <Ionicons name="camera-outline" size={20} color={colors.primary} />
             <Text style={styles.changeAvatarText}>Change Photo</Text>
           </Pressable>
