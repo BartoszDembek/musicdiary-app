@@ -1,36 +1,133 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewService } from '../services/reviewService';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 import ReviewModal from './ReviewModal';
 
-const ReviewItem = ({ review, isUserReview, onEdit }) => (
-  <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
-    <View style={styles.reviewHeader}>
-      <View style={styles.ratingDisplay}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <Ionicons
-            key={star}
-            name={star <= review.rating ? "star" : "star-outline"}
-            size={16}
-            color="#BB9AF7"
-          />
-        ))}
+const MOCK_COMMENTS = [
+  { id: 1, user: 'Alice', text: 'Totally agree with this!', date: '2024-03-10' },
+  { id: 2, user: 'Bob', text: 'Interesting perspective.', date: '2024-03-11' },
+  { id: 3, user: 'Charlie', text: 'I think you missed a point about the production.', date: '2024-03-12' },
+];
+
+const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleComments }) => {
+  const [vote, setVote] = useState(0); // 0: none, 1: up, -1: down
+
+  const handleVote = (type) => {
+    if (type === 'up') {
+      setVote(prev => prev === 1 ? 0 : 1);
+    } else {
+      setVote(prev => prev === -1 ? 0 : -1);
+    }
+  };
+
+  return (
+    <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
+      <View style={styles.reviewHeader}>
+        <View style={styles.ratingDisplay}>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Ionicons
+              key={star}
+              name={star <= review.rating ? "star" : "star-outline"}
+              size={16}
+              color="#BB9AF7"
+            />
+          ))}
+        </View>
+        {isUserReview && (
+          <Pressable onPress={onEdit} style={styles.editButton}>
+            <Ionicons name="create" size={20} color="#7AA2F7" />
+          </Pressable>
+        )}
       </View>
-      {isUserReview && (
-        <Pressable onPress={onEdit} style={styles.editButton}>
-          <Ionicons name="create" size={20} color="#7AA2F7" />
-        </Pressable>
+      <Text style={styles.reviewText}>{review.text}</Text>
+
+      <View style={styles.reviewFooter}>
+        <Text style={styles.reviewDate}>
+          {new Date(review.created_at).toLocaleDateString()}
+        </Text>
+
+        <View style={styles.actionsContainer}>
+          <View style={styles.voteContainer}>
+            <View style={styles.voteButtonContainer}>
+              <Pressable
+                style={styles.actionButton}
+                onPress={() => handleVote('up')}
+              >
+                <Ionicons
+                  name={vote === 1 ? "add-circle" : "add-circle-outline"}
+                  size={20}
+                  color={vote === 1 ? "#7AA2F7" : "#565F89"}
+                />
+              </Pressable>
+              <Text style={[styles.voteCount, vote === 1 && { color: "#7AA2F7" }]}>
+                {12 + (vote === 1 ? 1 : 0)}
+              </Text>
+            </View>
+
+            <View style={styles.voteButtonContainer}>
+              <Pressable
+                style={styles.actionButton}
+                onPress={() => handleVote('down')}
+              >
+                <Ionicons
+                  name={vote === -1 ? "remove-circle" : "remove-circle-outline"}
+                  size={20}
+                  color={vote === -1 ? "#F7768E" : "#565F89"}
+                />
+              </Pressable>
+              <Text style={[styles.voteCount, vote === -1 && { color: "#F7768E" }]}>
+                {3 + (vote === -1 ? 1 : 0)}
+              </Text>
+            </View>
+          </View>
+
+          <Pressable
+            style={[styles.commentButton, showComments && styles.activeCommentButton]}
+            onPress={onToggleComments}
+          >
+            <Ionicons
+              name={showComments ? "chatbubble" : "chatbubble-outline"}
+              size={18}
+              color={showComments ? "#BB9AF7" : "#7AA2F7"}
+            />
+            <Text style={[styles.commentText, showComments && { color: "#BB9AF7" }]}>
+              {showComments ? "Close" : ""}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {showComments && (
+        <View style={styles.commentsSection}>
+          <ScrollView style={styles.commentsList} nestedScrollEnabled={true}>
+            {MOCK_COMMENTS.map((comment) => (
+              <View key={comment.id} style={styles.commentItem}>
+                <View style={styles.commentHeader}>
+                  <Text style={styles.commentUser}>{comment.user}</Text>
+                  <Text style={styles.commentDate}>{comment.date}</Text>
+                </View>
+                <Text style={styles.commentContent}>{comment.text}</Text>
+              </View>
+            ))}
+          </ScrollView>
+          <View style={styles.addCommentContainer}>
+            <TextInput
+              placeholder="Write a comment..."
+              placeholderTextColor="#565F89"
+              style={styles.commentInput}
+            />
+            <Pressable style={styles.sendCommentButton}>
+              <Ionicons name="send" size={16} color="#1E1E2E" />
+            </Pressable>
+          </View>
+        </View>
       )}
     </View>
-    <Text style={styles.reviewText}>{review.text}</Text>
-    <Text style={styles.reviewDate}>
-      {new Date(review.created_at).toLocaleDateString()}
-    </Text>
-  </View>
-);
+  );
+};
 
 const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
   const [userReview, setUserReview] = useState(null);
@@ -38,6 +135,7 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState('');
+  const [activeReviewId, setActiveReviewId] = useState(null);
   const { user, updateUserProfile } = useAuth();
 
   useEffect(() => {
@@ -62,9 +160,7 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
     try {
       await reviewService.saveReview(userId, itemId, review, type, rating, artistName, itemName);
       setIsModalVisible(false);
-      loadReviews(); // Reload reviews after saving
-      
-      // Update user profile after saving review
+      loadReviews();
       if (user?.id) {
         const freshProfileData = await userService.getUserProfile(user.id);
         if (freshProfileData && freshProfileData[0]) {
@@ -76,40 +172,72 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.title}>Your Review</Text>
-        {userReview ? (
-          <ReviewItem 
-            review={userReview} 
-            isUserReview={true} 
+  const toggleComments = (id) => {
+    setActiveReviewId(prev => prev === id ? null : id);
+  };
+
+  const renderReviewList = () => {
+    let reviewsToList = [];
+    if (userReview) {
+      reviewsToList.push({ ...userReview, isUser: true });
+    }
+    reviewsToList = [...reviewsToList, ...allReviews.map(r => ({ ...r, isUser: false }))];
+
+    if (activeReviewId) {
+      const activeIndex = reviewsToList.findIndex(r => r.id === activeReviewId);
+      if (activeIndex > -1) {
+        const [active] = reviewsToList.splice(activeIndex, 1);
+        reviewsToList.unshift(active);
+      }
+    }
+
+    const activeReview = activeReviewId ? reviewsToList.find(r => r.id === activeReviewId) : null;
+    const restReviews = reviewsToList.filter(r => r.id !== activeReviewId);
+
+    return (
+      <>
+        {activeReview && (
+          <ReviewItem
+            review={activeReview}
+            isUserReview={activeReview.isUser}
             onEdit={() => setIsModalVisible(true)}
+            showComments={true}
+            onToggleComments={() => toggleComments(activeReview.id)}
           />
-        ) : (
-          <Pressable 
+        )}
+
+        {!userReview && (
+          <Pressable
             onPress={() => setIsModalVisible(true)}
-            style={styles.addReviewButton}
+            style={[styles.addReviewButton, activeReview && { marginTop: 12 }]}
           >
             <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
             <Text style={styles.addReviewText}>Add your review</Text>
           </Pressable>
         )}
-      </View>
 
-      {allReviews.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.title}>Other Reviews</Text>
-          <FlatList
-            data={allReviews}
-            renderItem={({ item }) => (
-              <ReviewItem review={item} isUserReview={false} />
-            )}
-            keyExtractor={item => item.id.toString()}
-            scrollEnabled={false}
-          />
-        </View>
-      )}
+        {restReviews.map((item, index) => (
+          <View key={item.id}>
+            {(index > 0 || activeReview || !userReview) && <View style={styles.divider} />}
+            <ReviewItem
+              review={item}
+              isUserReview={item.isUser}
+              onEdit={() => setIsModalVisible(true)}
+              showComments={false}
+              onToggleComments={() => toggleComments(item.id)}
+            />
+          </View>
+        ))}
+      </>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.title}>Reviews</Text>
+        {renderReviewList()}
+      </View>
 
       <ReviewModal
         visible={isModalVisible}
@@ -188,6 +316,111 @@ const styles = StyleSheet.create({
   },
   editButton: {
     padding: 4,
+  },
+  reviewFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(187, 154, 247, 0.1)',
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  voteContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 20,
+    padding: 4,
+    gap: 12,
+  },
+  voteButtonContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  actionButton: {
+    padding: 4,
+  },
+  voteCount: {
+    color: '#C0CAF5',
+    fontSize: 14,
+    fontWeight: '600',
+    minWidth: 16,
+    textAlign: 'center',
+  },
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 4,
+  },
+  commentText: {
+    color: '#7AA2F7',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: 'rgba(187, 154, 247, 0.1)',
+    marginVertical: 16,
+  },
+  commentsSection: {
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(187, 154, 247, 0.1)',
+  },
+  commentsList: {
+    maxHeight: 200,
+    marginBottom: 16,
+  },
+  commentItem: {
+    marginBottom: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    padding: 12,
+    borderRadius: 8,
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  commentUser: {
+    color: '#BB9AF7',
+    fontWeight: '600',
+    fontSize: 12,
+  },
+  commentDate: {
+    color: '#565F89',
+    fontSize: 10,
+  },
+  commentContent: {
+    color: '#C0CAF5',
+    fontSize: 14,
+  },
+  addCommentContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  commentInput: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    borderRadius: 8,
+    padding: 8,
+    color: '#C0CAF5',
+  },
+  sendCommentButton: {
+    backgroundColor: '#BB9AF7',
+    padding: 8,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
