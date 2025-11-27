@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import ReviewModal from './ReviewModal';
 import CommentsSection from './CommentsSection';
 
-const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleComments }) => {
+const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleComments, userId }) => {
   const [vote, setVote] = useState(0); // 0: none, 1: up, -1: down
 
   const handleVote = (type) => {
@@ -95,7 +95,13 @@ const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleCommen
         </View>
       </View>
 
-      {showComments && <CommentsSection />}
+      {showComments && (
+        <CommentsSection 
+          comments={review.review_comments} 
+          reviewId={review.id}
+          userId={userId}
+        />
+      )}
     </View>
   );
 };
@@ -174,6 +180,7 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
             onEdit={() => setIsModalVisible(true)}
             showComments={true}
             onToggleComments={() => toggleComments(activeReview.id)}
+            userId={userId}
           />
         )}
 
@@ -196,6 +203,7 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
               onEdit={() => setIsModalVisible(true)}
               showComments={false}
               onToggleComments={() => toggleComments(item.id)}
+              userId={userId}
             />
           </View>
         ))}

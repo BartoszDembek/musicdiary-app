@@ -1,22 +1,41 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable, TextInput, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Pressable, TextInput, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { reviewService } from '../services/reviewService';
 
-const MOCK_COMMENTS = [
-  { id: 1, user: 'Alice', text: 'Totally agree with this!', date: '2024-03-10' },
-  { id: 2, user: 'Bob', text: 'Interesting perspective.', date: '2024-03-11' },
-  { id: 3, user: 'Charlie', text: 'I think you missed a point about the production.', date: '2024-03-12' },
-];
+const CommentsSection = ({ comments = [], reviewId, userId }) => {
+  const [localComments, setLocalComments] = useState(comments);
+  const [commentText, setCommentText] = useState('');
 
-const CommentsSection = () => {
+  useEffect(() => {
+    setLocalComments(comments);
+  }, [comments]);
+
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+    
+    try {
+      const result = await reviewService.addComment(reviewId, userId, commentText);
+      if (result) {
+        setCommentText('');
+        const newComments = await reviewService.getComments(reviewId);
+        if (newComments) {
+          setLocalComments(newComments);
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to add comment');
+    }
+  };
+
   return (
     <View style={styles.commentsSection}>
       <ScrollView style={styles.commentsList} nestedScrollEnabled={true}>
-        {MOCK_COMMENTS.map((comment) => (
+        {localComments.map((comment) => (
           <View key={comment.id} style={styles.commentItem}>
             <View style={styles.commentHeader}>
-              <Text style={styles.commentUser}>{comment.user}</Text>
-              <Text style={styles.commentDate}>{comment.date}</Text>
+              <Text style={styles.commentUser}>{comment.username}</Text>
+              <Text style={styles.commentDate}>{new Date(comment.created_at).toLocaleDateString()}</Text>
             </View>
             <Text style={styles.commentContent}>{comment.text}</Text>
           </View>
@@ -27,8 +46,10 @@ const CommentsSection = () => {
           placeholder="Write a comment..."
           placeholderTextColor="#565F89"
           style={styles.commentInput}
+          value={commentText}
+          onChangeText={setCommentText}
         />
-        <Pressable style={styles.sendCommentButton}>
+        <Pressable style={styles.sendCommentButton} onPress={handleAddComment}>
           <Ionicons name="send" size={16} color="#1E1E2E" />
         </Pressable>
       </View>
