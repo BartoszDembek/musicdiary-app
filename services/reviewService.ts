@@ -40,7 +40,6 @@ export const reviewService = {
   getReviewsBySpotifyId: async (spotifyId, type) => {
     try {
       const response = await axios.get(`${API_URL}/review/${spotifyId}?type=${type}`);
-      console.log('Fetched reviews:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error getting reviews:', error);
