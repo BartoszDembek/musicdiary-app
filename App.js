@@ -16,6 +16,7 @@ import FeaturedReviewsScreen from './screens/FeaturedReviewsScreen';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import TrackScreen from './screens/TrackScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
+import UserProfileScreen from './screens/UserProfileScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -28,6 +29,7 @@ function HomeStack() {
       <Stack.Screen name="Album" component={AlbumScreen} />
       <Stack.Screen name="Artist" component={ArtistScreen} />
       <Stack.Screen name="Track" component={TrackScreen} />
+      <Stack.Screen name="UserProfile" component={UserProfileScreen} />
     </Stack.Navigator>
   );
 }

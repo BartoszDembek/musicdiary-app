@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { reviewService } from '../services/reviewService';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
@@ -9,11 +10,26 @@ import CommentsSection from './CommentsSection';
 import VoteSection from './VoteSection';
 
 const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleComments, userId }) => {
+  const navigation = useNavigation();
+  
+  const handleAvatarPress = () => {
+    if (review.user_id === userId) {
+      // Navigate to user's own profile (tab navigator)
+      navigation.navigate('Profile');
+    } else {
+      // Navigate to other user's profile
+      navigation.navigate('UserProfile', { userId: review.user_id });
+    }
+  };
+
   return (
     <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
       <View style={styles.reviewHeader}>
         <View style={styles.userInfo}>
-          <View style={styles.avatarContainer}>
+          <Pressable 
+            style={styles.avatarContainer}
+            onPress={handleAvatarPress}
+          >
             {review.users?.avatar && review.users.avatar !== "NULL" ? (
               <Image
                 source={{ uri: review.users.avatar }}
@@ -24,7 +40,7 @@ const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleCommen
                 {review.users?.username ? review.users.username[0].toUpperCase() : '?'}
               </Text>
             )}
-          </View>
+          </Pressable>
           <View style={styles.userDetails}>
             <Text style={styles.username}>{review.users?.username || 'Anonymous'}</Text>
             <View style={styles.ratingDisplay}>
