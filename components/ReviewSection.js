@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewService } from '../services/reviewService';
 import { userService } from '../services/userService';
@@ -12,15 +12,32 @@ const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleCommen
   return (
     <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
       <View style={styles.reviewHeader}>
-        <View style={styles.ratingDisplay}>
-          {[1, 2, 3, 4, 5].map((star) => (
-            <Ionicons
-              key={star}
-              name={star <= review.rating ? "star" : "star-outline"}
-              size={16}
-              color="#BB9AF7"
-            />
-          ))}
+        <View style={styles.userInfo}>
+          <View style={styles.avatarContainer}>
+            {review.users?.avatar && review.users.avatar !== "NULL" ? (
+              <Image
+                source={{ uri: review.users.avatar }}
+                style={styles.avatar}
+              />
+            ) : (
+              <Text style={styles.avatarText}>
+                {review.users?.username ? review.users.username[0].toUpperCase() : '?'}
+              </Text>
+            )}
+          </View>
+          <View style={styles.userDetails}>
+            <Text style={styles.username}>{review.users?.username || 'Anonymous'}</Text>
+            <View style={styles.ratingDisplay}>
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Ionicons
+                  key={star}
+                  name={star <= review.rating ? "star" : "star-outline"}
+                  size={14}
+                  color="#BB9AF7"
+                />
+              ))}
+            </View>
+          </View>
         </View>
         {isUserReview && (
           <Pressable onPress={onEdit} style={styles.editButton}>
@@ -221,8 +238,41 @@ const styles = StyleSheet.create({
   reviewHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  userInfo: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
+    gap: 12,
+    flex: 1,
+  },
+  avatarContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(187, 154, 247, 0.1)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  avatarText: {
+    fontSize: 16,
+    color: '#BB9AF7',
+    fontWeight: 'bold',
+  },
+  userDetails: {
+    flex: 1,
+    gap: 4,
+  },
+  username: {
+    color: '#C0CAF5',
+    fontSize: 15,
+    fontWeight: '600',
   },
   ratingDisplay: {
     flexDirection: 'row',
