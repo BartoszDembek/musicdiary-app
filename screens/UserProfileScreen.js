@@ -1,21 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, ActivityIndicator, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { userService } from '../services/userService';
+import { followService } from '../services/followService';
+import { useAuth } from '../context/AuthContext';
 import { colors, commonStyles } from '../theme';
 import RecentActivity from '../components/RecentActivity';
 
 const UserProfileScreen = () => {
   const [userProfile, setUserProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isFollowed, setIsFollowed] = useState(false);
   const navigation = useNavigation();
   const route = useRoute();
   const { userId } = route.params;
+  const { userProfile: currentUserProfile, user, updateUserProfile } = useAuth();
 
-  useEffect(() => {
-    loadUserProfile();
-  }, [userId]);
+  const checkIfFollowed = () => {
+    if (currentUserProfile?.follows?.[0]?.follow && Array.isArray(currentUserProfile.follows[0].follow)) {
+      const isUserFollowed = currentUserProfile.follows[0].follow.some(
+        item => item.id === userId
+      );
+      setIsFollowed(isUserFollowed);
+    } else {
+      setIsFollowed(false);
+    }
+  };
+
+  const handleFollow = async () => {
+    try {
+      let updatedProfile;
+      const targetUsername = userProfile.username;
+      if (isFollowed) {
+        updatedProfile = await followService.unfollowUser(user.id, userId);
+      } else {
+        updatedProfile = await followService.followUser(user.id, userId, targetUsername);
+      }
+      
+      if (updatedProfile) {
+        const freshProfileData = await userService.getUserProfile(user.id);
+        if (freshProfileData && freshProfileData[0]) {
+          await updateUserProfile(freshProfileData[0]);
+          setIsFollowed(!isFollowed);
+        }
+      }
+    } catch (error) {
+      Alert.alert("Błąd", isFollowed ? "Nie udało się przestać obserwować użytkownika" : "Nie udało się zaobserwować użytkownika");
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(true);
+      loadUserProfile();
+    }, [userId])
+  );
 
   const loadUserProfile = async () => {
     try {
@@ -23,6 +63,7 @@ const UserProfileScreen = () => {
       const profileData = await userService.getUserProfile(userId);
       if (profileData && profileData[0]) {
         setUserProfile(profileData[0]);
+        checkIfFollowed();
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -56,6 +97,11 @@ const UserProfileScreen = () => {
       return 0;
     }
     return Array.isArray(userProfile.favorites[0].favorite) ? userProfile.favorites[0].favorite.length : 0;
+  };
+
+  const getFollowersCount = () => {
+    // Mock data - do zaimplementowania w przyszłości
+    return 0;
   };
 
   if (loading) {
@@ -101,7 +147,22 @@ const UserProfileScreen = () => {
             <Ionicons name="arrow-back" size={24} color={colors.primary} />
           </Pressable>
           <Text style={styles.headerTitle}>Profile</Text>
-          <View style={{ width: 40 }} />
+          {user?.id !== userId && (
+            <Pressable 
+              onPress={handleFollow} 
+              style={[styles.followButton, isFollowed && styles.followingButton]}
+            >
+              <Ionicons 
+                name={isFollowed ? "checkmark" : "add"} 
+                size={18} 
+                color={isFollowed ? colors.primary : colors.background} 
+              />
+              <Text style={[styles.followButtonText, isFollowed && styles.followingText]}>
+                {isFollowed ? "Following" : "Follow"}
+              </Text>
+            </Pressable>
+          )}
+          {user?.id === userId && <View style={{ width: 40 }} />}
         </View>
 
         {/* User Info */}
@@ -130,6 +191,10 @@ const UserProfileScreen = () => {
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{getReviewsCount()}</Text>
             <Text style={styles.statLabel}>Reviews</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Text style={styles.statNumber}>{getFollowersCount()}</Text>
+            <Text style={styles.statLabel}>Followers</Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statNumber}>{getFollowsCount()}</Text>
@@ -235,6 +300,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
+  },
+  followButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
+  },
+  followingButton: {
+    backgroundColor: colors.surface,
+  },
+  followButtonText: {
+    color: colors.background,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  followingText: {
+    color: colors.primary,
   },
 });
 

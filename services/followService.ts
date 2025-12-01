@@ -33,5 +33,38 @@ export const followService = {
               throw new Error('Request failed');
             }
         }
+    },
+
+    followUser: async (userId: string, targetUserId: string, targetUsername?: string) => {
+        try {
+            const url = `${API_URL}/follows/follow-user/${userId}?targetUserId=${targetUserId}`;
+            const body: { targetUserName?: string } = {};
+            if (targetUsername) body.targetUserName = targetUsername;
+            const response = await axios.post(url, body);
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+              throw new Error(error.response.data.message || 'Nie udało się zaobserwować użytkownika');
+            } else if (error.request) {
+              throw new Error('Brak odpowiedzi od serwera');
+            } else {
+              throw new Error('Błąd podczas wysyłania żądania');
+            }
+        }
+    },
+
+    unfollowUser: async (userId: string, targetUserId: string) => {
+        try {
+            const response = await axios.post(`${API_URL}/follows/unfollow-user/${userId}?targetUserId=${targetUserId}`);
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+              throw new Error(error.response.data.message || 'Nie udało się przestać obserwować użytkownika');
+            } else if (error.request) {
+              throw new Error('Brak odpowiedzi od serwera');
+            } else {
+              throw new Error('Błąd podczas wysyłania żądania');
+            }
+        }
     }
 };

@@ -45,12 +45,14 @@ const RecentActivity = ({ follows, reviews, favorites, review_comments }) => {
     // Add follows
     if (follows && follows[0] && Array.isArray(follows[0].follow)) {
       follows[0].follow.forEach(follow => {
+        const isArtist = follow.artist_name;
+        const isUser = follow.user_name;
         activities.push({
           type: 'follow',
           data: follow,
           created_at: follow.createdAt,
-          title: `Following ${follow.artist_name || 'an artist'}`,
-          subtitle: 'Artist'
+          title: `Following ${isArtist ? follow.artist_name : isUser ? follow.user_name : 'someone'}`,
+          subtitle: isArtist ? 'Artist' : isUser ? 'User' : 'Unknown'
         });
       });
     }
