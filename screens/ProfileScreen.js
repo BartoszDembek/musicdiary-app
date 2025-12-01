@@ -136,12 +136,12 @@ const ProfileScreen = () => {
             <Text style={styles.statLabel}>Favorites</Text>
           </View>
         </View>
-
         {/* Recent Activity */}
         <RecentActivity 
           follows={userProfile?.follows}
           reviews={userProfile?.reviews}
           favorites={userProfile?.favorites}
+          review_comments={userProfile?.review_comments}
         />
       </ScrollView>
     </SafeAreaView>

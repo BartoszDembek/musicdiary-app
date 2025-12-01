@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, commonStyles } from '../theme';
 
-const RecentActivity = ({ follows, reviews, favorites }) => {
+const RecentActivity = ({ follows, reviews, favorites, review_comments }) => {
   
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -68,6 +68,18 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
       });
     }
 
+    // Add review comments
+    if (review_comments && Array.isArray(review_comments)) {
+      review_comments.forEach(comment => {
+        activities.push({
+          type: 'comment',
+          data: comment,
+          created_at: comment.created_at,
+          title: `Commented on a review`,
+        });
+      });
+    }
+
     // Sort by created_at (newest first)
     return activities
       .filter(activity => activity.created_at)
@@ -83,6 +95,8 @@ const RecentActivity = ({ follows, reviews, favorites }) => {
         return 'person-add';
       case 'favorite':
         return 'heart';
+      case 'comment':
+        return 'chatbubble';
       default:
         return 'star';
     }
