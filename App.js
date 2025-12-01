@@ -17,6 +17,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import TrackScreen from './screens/TrackScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
+import StatsDetailScreen from './screens/StatsDetailScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -81,6 +82,7 @@ function Navigation() {
           <>
             <Stack.Screen name="MainTabs" component={TabNavigator} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Stack.Screen name="StatsDetail" component={StatsDetailScreen} />
           </>
         ) : (
           // Non-authenticated stack

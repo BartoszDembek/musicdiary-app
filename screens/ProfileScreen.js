@@ -49,6 +49,33 @@ const ProfileScreen = () => {
     return 0;
   };
 
+  const handleStatPress = (type) => {
+    let data = [];
+    let title = '';
+
+    switch (type) {
+      case 'reviews':
+        data = userProfile?.reviews || [];
+        title = 'Reviews';
+        break;
+      case 'followers':
+        // Mock data - do zaimplementowania w przyszłości
+        data = [];
+        title = 'Followers';
+        break;
+      case 'following':
+        data = userProfile?.follows?.[0]?.follow || [];
+        title = 'Following';
+        break;
+      case 'favorites':
+        data = userProfile?.favorites?.[0]?.favorite || [];
+        title = 'Favorites';
+        break;
+    }
+
+    navigation.navigate('StatsDetail', { type, data, title });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
@@ -128,22 +155,34 @@ const ProfileScreen = () => {
 
         {/* Stats */}
         <View style={styles.statsContainer}>
-          <View style={styles.statItem}>
+          <Pressable 
+            style={styles.statItem}
+            onPress={() => handleStatPress('reviews')}
+          >
             <Text style={styles.statNumber}>{getReviewsCount()}</Text>
             <Text style={styles.statLabel}>Reviews</Text>
-          </View>
-          <View style={styles.statItem}>
+          </Pressable>
+          <Pressable 
+            style={styles.statItem}
+            onPress={() => handleStatPress('followers')}
+          >
             <Text style={styles.statNumber}>{getFollowersCount()}</Text>
             <Text style={styles.statLabel}>Followers</Text>
-          </View>
-          <View style={styles.statItem}>
+          </Pressable>
+          <Pressable 
+            style={styles.statItem}
+            onPress={() => handleStatPress('following')}
+          >
             <Text style={styles.statNumber}>{getFollowsCount()}</Text>
             <Text style={styles.statLabel}>Following</Text>
-          </View>
-          <View style={styles.statItem}>
+          </Pressable>
+          <Pressable 
+            style={styles.statItem}
+            onPress={() => handleStatPress('favorites')}
+          >
             <Text style={styles.statNumber}>{getFavoritesCount()}</Text>
             <Text style={styles.statLabel}>Favorites</Text>
-          </View>
+          </Pressable>
         </View>
         {/* Recent Activity */}
         <RecentActivity 
