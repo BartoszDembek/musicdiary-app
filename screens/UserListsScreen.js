@@ -79,7 +79,7 @@ export default function UserListsScreen({ navigation, route }) {
         <Text style={styles.listDescription} numberOfLines={2}>{item.description}</Text>
       ) : null}
       <Text style={styles.itemCount}>
-        {item.items ? item.list_items.length : 0} items
+        {item.list_items ? item.list_items.length : 0} items
       </Text>
     </TouchableOpacity>
   );
