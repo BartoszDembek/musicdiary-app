@@ -62,6 +62,7 @@ const UserProfileScreen = () => {
     try {
       setLoading(true);
       const profileData = await userService.getUserProfile(userId);
+      console.log('Loaded user profile data:', profileData[0]?.followers);
       if (profileData && profileData[0]) {
         setUserProfile(profileData[0]);
         checkIfFollowed();
@@ -101,8 +102,10 @@ const UserProfileScreen = () => {
   };
 
   const getFollowersCount = () => {
-    // Mock data - do zaimplementowania w przyszłości
-    return 0;
+    if (!userProfile?.followers) {
+      return 0;
+    }
+    return Array.isArray(userProfile.followers) ? userProfile.followers.length : 0;
   };
 
   const handleStatPress = (type) => {
@@ -116,7 +119,7 @@ const UserProfileScreen = () => {
         break;
       case 'followers':
         // Mock data - do zaimplementowania w przyszłości
-        data = [];
+        data = userProfile?.followers || [];
         title = 'Followers';
         break;
       case 'following':

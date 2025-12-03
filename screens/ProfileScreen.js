@@ -45,8 +45,10 @@ const ProfileScreen = () => {
   };
 
   const getFollowersCount = () => {
-    // Mock data - do zaimplementowania w przyszłości
-    return 0;
+    if (!userProfile?.followers) {
+      return 0;
+    }
+    return Array.isArray(userProfile.followers) ? userProfile.followers.length : 0;
   };
 
   const handleStatPress = (type) => {
@@ -60,7 +62,7 @@ const ProfileScreen = () => {
         break;
       case 'followers':
         // Mock data - do zaimplementowania w przyszłości
-        data = [];
+        data = userProfile?.followers || [];
         title = 'Followers';
         break;
       case 'following':
