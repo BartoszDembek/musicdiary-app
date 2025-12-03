@@ -90,5 +90,29 @@ export const listService = {
       }
       throw new Error('Błąd połączenia');
     }
+  },
+
+  updateList: async (listId, data) => {
+    try {
+      const response = await axios.put(`${API_URL}/lists/${listId}`, data);
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Błąd aktualizacji listy');
+      }
+      throw new Error('Błąd połączenia');
+    }
+  },
+
+  updateListItemsOrder: async (listId, items) => {
+    try {
+      const response = await axios.put(`${API_URL}/lists/${listId}/items/reorder`, { items });
+      return response.data;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(error.response.data.message || 'Błąd aktualizacji kolejności');
+      }
+      throw new Error('Błąd połączenia');
+    }
   }
 };

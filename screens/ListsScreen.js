@@ -21,6 +21,7 @@ export default function ListsScreen({ navigation }) {
     setLoading(true);
     try {
       const userLists = await listService.getUserLists(user.id);
+      console.log('Loaded user lists:', userLists);
       setLists(userLists);
     } catch (error) {
       console.error(error);
