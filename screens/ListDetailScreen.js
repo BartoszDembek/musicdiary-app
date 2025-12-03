@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { colors } from '../theme/colors';
 import { commonStyles } from '../theme/commonStyles';
 import { listService } from '../services/listService';
@@ -50,12 +52,21 @@ export default function ListDetailScreen({ route, navigation }) {
         isPublic: list.isPublic // Preserve existing visibility
       });
 
-      // Update items order if changed
-      // Note: This assumes the backend supports reordering via this endpoint
-      // If not, we might need to implement a different strategy
-      if (JSON.stringify(localItems) !== JSON.stringify(list.list_items)) {
-         // Assuming updateListItemsOrder takes list of items with their new positions
-         // We might need to map to just IDs or full objects depending on backend
+      // Identify deleted items
+      const originalIds = new Set(list.list_items.map(i => i.id));
+      const currentIds = new Set(localItems.map(i => i.id));
+      const deletedItemIds = list.list_items
+        .filter(i => !currentIds.has(i.id))
+        .map(i => i.id);
+
+      // Delete removed items
+      for (const itemId of deletedItemIds) {
+        await listService.removeListItem(listId, itemId);
+      }
+
+      // Update items order if changed or items were deleted
+      // We send the current localItems which represents the desired order
+      if (localItems.length > 0 || deletedItemIds.length > 0) {
          await listService.updateListItemsOrder(listId, localItems);
       }
 
@@ -66,6 +77,12 @@ export default function ListDetailScreen({ route, navigation }) {
       Alert.alert('Error', error.message);
       setLoading(false);
     }
+  };
+
+  const handleRemoveItem = (index) => {
+    const newItems = [...localItems];
+    newItems.splice(index, 1);
+    setLocalItems(newItems);
   };
 
   const moveItem = (index, direction) => {
@@ -100,43 +117,44 @@ export default function ListDetailScreen({ route, navigation }) {
     );
   };
 
-  const renderItem = ({ item, index }) => (
-    <View style={styles.itemCard}>
-      <Text style={styles.itemPosition}>{index + 1}</Text>
-      {item.cover ? (
-        <Image source={{ uri: item.cover }} style={styles.itemImage} />
-      ) : (
-        <View style={styles.itemIcon}>
-          <Ionicons 
-            name={item.type === 'album' ? 'disc' : item.type === 'artist' ? 'person' : 'musical-note'} 
-            size={24} 
-            color={colors.primary} 
-          />
+  const renderItem = ({ item, index, drag, isActive }) => (
+    <ScaleDecorator>
+      <TouchableOpacity
+        onLongPress={isEditing ? drag : null}
+        disabled={!isEditing}
+        style={[
+          styles.itemCard, 
+          isActive && { backgroundColor: colors.cardDark, elevation: 5 }
+        ]}
+      >
+        <Text style={styles.itemPosition}>{item.position + 1}</Text>
+        {item.cover ? (
+          <Image source={{ uri: item.cover }} style={styles.itemImage} />
+        ) : (
+          <View style={styles.itemIcon}>
+            <Ionicons 
+              name={item.type === 'album' ? 'disc' : item.type === 'artist' ? 'person' : 'musical-note'} 
+              size={24} 
+              color={colors.primary} 
+            />
+          </View>
+        )}
+        <View style={styles.itemContent}>
+          <Text style={styles.itemName}>{item.item_name}</Text>
+          <Text style={styles.itemSubtext}>{item.artist_name || item.type}</Text>
         </View>
-      )}
-      <View style={styles.itemContent}>
-        <Text style={styles.itemName}>{item.item_name}</Text>
-        <Text style={styles.itemSubtext}>{item.artist_name || item.type}</Text>
-      </View>
-      {isEditing && (
-        <View style={styles.reorderControls}>
-          <TouchableOpacity 
-            onPress={() => moveItem(index, 'up')} 
-            disabled={index === 0}
-            style={[styles.moveButton, index === 0 && styles.disabledButton]}
-          >
-            <Ionicons name="chevron-up" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={() => moveItem(index, 'down')} 
-            disabled={index === localItems.length - 1}
-            style={[styles.moveButton, index === localItems.length - 1 && styles.disabledButton]}
-          >
-            <Ionicons name="chevron-down" size={20} color={colors.textPrimary} />
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+        {isEditing && (
+          <View style={styles.reorderControls}>
+            <TouchableOpacity onPress={() => handleRemoveItem(item.position)} style={styles.deleteButton}>
+              <Ionicons name="trash-outline" size={24} color={colors.tertiary} />
+            </TouchableOpacity>
+            <TouchableOpacity onPressIn={drag}>
+              <Ionicons name="menu" size={24} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </View>
+        )}
+      </TouchableOpacity>
+    </ScaleDecorator>
   );
 
   if (loading) {
@@ -155,75 +173,78 @@ export default function ListDetailScreen({ route, navigation }) {
   };
 
   return (
-    <SafeAreaView style={commonStyles.container}>
-      <View style={commonStyles.header}>
-        <TouchableOpacity onPress={() => isEditing ? handleCancel() : navigation.goBack()}>
-          <Ionicons name={isEditing ? "close" : "arrow-back"} size={24} color={colors.textPrimary} />
-        </TouchableOpacity>
-        
-        {isEditing ? (
-          <TextInput
-            style={[commonStyles.headerTitle, styles.headerInput]}
-            value={editTitle}
-            onChangeText={setEditTitle}
-            placeholder="List Title"
-            placeholderTextColor={colors.textSecondary}
-          />
-        ) : (
-          <Text style={commonStyles.headerTitle} numberOfLines={1}>{list?.title || title}</Text>
-        )}
-
-        <View style={styles.headerActions}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={commonStyles.container}>
+        <View style={commonStyles.header}>
+          <TouchableOpacity onPress={() => isEditing ? handleCancel() : navigation.goBack()}>
+            <Ionicons name={isEditing ? "close" : "arrow-back"} size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          
           {isEditing ? (
-            <TouchableOpacity onPress={handleSave}>
-              <Ionicons name="checkmark" size={24} color={colors.primary} />
-            </TouchableOpacity>
-          ) : (
-            <>
-              <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.actionButton}>
-                <Ionicons name="create-outline" size={24} color={colors.textPrimary} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={handleDeleteList}>
-                <Ionicons name="trash-outline" size={24} color={colors.tertiary} />
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-      </View>
-
-      <View style={styles.content}>
-        {isEditing ? (
-          <View style={styles.descriptionContainer}>
             <TextInput
-              style={styles.descriptionInput}
-              value={editDescription}
-              onChangeText={setEditDescription}
-              placeholder="List Description (optional)"
+              style={[commonStyles.headerTitle, styles.headerInput]}
+              value={editTitle}
+              onChangeText={setEditTitle}
+              placeholder="List Title"
               placeholderTextColor={colors.textSecondary}
-              multiline
             />
-          </View>
-        ) : (
-          list?.description ? (
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.description}>{list.description}</Text>
-            </View>
-          ) : null
-        )}
+          ) : (
+            <Text style={commonStyles.headerTitle} numberOfLines={1}>{list?.title || title}</Text>
+          )}
 
-        <FlatList
-          data={isEditing ? localItems : (list?.list_items || [])}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => item.id?.toString() || index.toString()}
-          contentContainerStyle={styles.listContainer}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>This list is empty</Text>
+          <View style={styles.headerActions}>
+            {isEditing ? (
+              <TouchableOpacity onPress={handleSave}>
+                <Ionicons name="checkmark" size={24} color={colors.primary} />
+              </TouchableOpacity>
+            ) : (
+              <>
+                <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.actionButton}>
+                  <Ionicons name="create-outline" size={24} color={colors.textPrimary} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleDeleteList}>
+                  <Ionicons name="trash-outline" size={24} color={colors.tertiary} />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+
+        <View style={styles.content}>
+          {isEditing ? (
+            <View style={styles.descriptionContainer}>
+              <TextInput
+                style={styles.descriptionInput}
+                value={editDescription}
+                onChangeText={setEditDescription}
+                placeholder="List Description (optional)"
+                placeholderTextColor={colors.textSecondary}
+                multiline
+              />
             </View>
-          }
-        />
-      </View>
-    </SafeAreaView>
+          ) : (
+            list?.description ? (
+              <View style={styles.descriptionContainer}>
+                <Text style={styles.description}>{list.description}</Text>
+              </View>
+            ) : null
+          )}
+
+          <DraggableFlatList
+            data={isEditing ? localItems : (list?.list_items || [])}
+            onDragEnd={({ data }) => setLocalItems(data)}
+            keyExtractor={(item, index) => item.id?.toString() || index.toString()}
+            renderItem={renderItem}
+            contentContainerStyle={styles.listContainer}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>This list is empty</Text>
+              </View>
+            }
+          />
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }
 
@@ -324,8 +345,13 @@ const styles = StyleSheet.create({
     paddingBottom: 2,
   },
   reorderControls: {
-    flexDirection: 'column',
+    flexDirection: 'row',
+    alignItems: 'center',
     marginLeft: 10,
+  },
+  deleteButton: {
+    marginRight: 15,
+    padding: 4,
   },
   moveButton: {
     padding: 4,
