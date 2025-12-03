@@ -118,6 +118,19 @@ const AlbumScreen = ({ route }) => {
                 <Ionicons name="arrow-back" size={24} color={colors.primary} />
               </Pressable>
               <View style={styles.rightButtons}>
+                <Pressable onPress={() => navigation.navigate('UserLists', { 
+                  userId: user.id, 
+                  mode: 'select',
+                  itemToAdd: {
+                    spotifyId: albumId,
+                    name: album.name,
+                    type: 'album',
+                    artistName: album.artists.map(a => a.name).join(', '),
+                    imageUrl: album.images[0]?.url
+                  }
+                })} style={styles.iconButton}>
+                  <Ionicons name="list" size={24} color={colors.primary} />
+                </Pressable>
                 <Pressable onPress={handleFavorite} style={styles.iconButton}>
                   <Ionicons 
                     name={isFavorite ? "heart" : "heart-outline"} 

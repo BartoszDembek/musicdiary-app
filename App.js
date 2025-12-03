@@ -18,6 +18,10 @@ import TrackScreen from './screens/TrackScreen';
 import EditProfileScreen from './screens/EditProfileScreen';
 import UserProfileScreen from './screens/UserProfileScreen';
 import StatsDetailScreen from './screens/StatsDetailScreen';
+import UserListsScreen from './screens/UserListsScreen';
+import CreateListScreen from './screens/CreateListScreen';
+import ListDetailScreen from './screens/ListDetailScreen';
+import ListsScreen from './screens/ListsScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -48,6 +52,8 @@ function TabNavigator() {
             iconName = 'grid';
           } else if (route.name === 'Reviews') {
             iconName = 'chatbubbles';
+          } else if (route.name === 'Lists') {
+            iconName = 'list';
           } else {
             iconName = 'person';
           }
@@ -58,6 +64,7 @@ function TabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Reviews" component={FeaturedReviewsScreen} />
+      <Tab.Screen name="Lists" component={ListsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
@@ -83,6 +90,9 @@ function Navigation() {
             <Stack.Screen name="MainTabs" component={TabNavigator} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
             <Stack.Screen name="StatsDetail" component={StatsDetailScreen} />
+            <Stack.Screen name="UserLists" component={UserListsScreen} />
+            <Stack.Screen name="CreateList" component={CreateListScreen} />
+            <Stack.Screen name="ListDetail" component={ListDetailScreen} />
           </>
         ) : (
           // Non-authenticated stack

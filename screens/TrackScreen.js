@@ -124,6 +124,19 @@ const TrackScreen = ({ route }) => {
                 <Ionicons name="arrow-back" size={24} color={colors.primary} />
               </Pressable>
               <View style={styles.rightButtons}>
+                <Pressable onPress={() => navigation.navigate('UserLists', { 
+                  userId: user.id, 
+                  mode: 'select',
+                  itemToAdd: {
+                    spotifyId: trackId,
+                    name: track.name,
+                    type: 'track',
+                    artistName: track.artists.map(a => a.name).join(', '),
+                    imageUrl: track.album.images[0]?.url
+                  }
+                })} style={styles.iconButton}>
+                  <Ionicons name="list" size={24} color={colors.primary} />
+                </Pressable>
                 <Pressable onPress={handleFavorite} style={styles.iconButton}>
                   <Ionicons 
                     name={isFavorite ? "heart" : "heart-outline"} 

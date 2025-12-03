@@ -122,6 +122,18 @@ const ArtistScreen = ({ route }) => {
                   {isFollowed ? "Following" : "Follow"}
                 </Text>
               </Pressable>
+              <Pressable onPress={() => navigation.navigate('UserLists', { 
+                userId: user.id, 
+                mode: 'select',
+                itemToAdd: {
+                  spotifyId: artistId,
+                  name: artist.name,
+                  type: 'artist',
+                  imageUrl: artist.images[0]?.url
+                }
+              })} style={styles.iconButton}>
+                <Ionicons name="list" size={24} color={colors.primary} />
+              </Pressable>
               <Pressable onPress={openInSpotify} style={styles.iconButton}>
                 <Entypo name="spotify" size={24} color={colors.spotify} />
               </Pressable>

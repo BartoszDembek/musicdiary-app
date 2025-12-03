@@ -184,6 +184,17 @@ const ProfileScreen = () => {
             <Text style={styles.statLabel}>Favorites</Text>
           </Pressable>
         </View>
+
+        <View style={styles.actionButtonsContainer}>
+          <Pressable 
+            style={styles.actionButton}
+            onPress={() => navigation.navigate('UserLists', { userId: user?.id })}
+          >
+            <Ionicons name="list" size={24} color={colors.primary} />
+            <Text style={styles.actionButtonText}>My Lists</Text>
+          </Pressable>
+        </View>
+
         {/* Recent Activity */}
         <RecentActivity 
           follows={userProfile?.follows}
@@ -270,6 +281,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
+  },
+  actionButtonsContainer: {
+    padding: 20,
+    paddingBottom: 0,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.card,
+    padding: 15,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 10,
+  },
+  actionButtonText: {
+    color: colors.primary,
+    fontSize: 16,
+    fontWeight: '600',
   },
   modalOverlay: {
     ...commonStyles.modalOverlay,
