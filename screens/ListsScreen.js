@@ -82,7 +82,7 @@ export default function ListsScreen({ navigation }) {
       ) : null}
       <View style={styles.listFooter}>
         <Text style={styles.itemCount}>
-          {(item.items || item.list_items || []).length} elementów
+          {(item.items || item.list_items || []).length} items
         </Text>
         {item.username && (
           <Text style={styles.authorName}>by {item.username}</Text>
@@ -94,7 +94,7 @@ export default function ListsScreen({ navigation }) {
   return (
     <SafeAreaView style={commonStyles.container}>
       <View style={commonStyles.header}>
-        <Text style={commonStyles.headerTitle}>Listy</Text>
+        <Text style={commonStyles.headerTitle}>Lists</Text>
       </View>
 
       <View style={styles.tabContainer}>
@@ -102,13 +102,13 @@ export default function ListsScreen({ navigation }) {
           style={[styles.tab, activeTab === 'my' && styles.activeTab]} 
           onPress={() => setActiveTab('my')}
         >
-          <Text style={[styles.tabText, activeTab === 'my' && styles.activeTabText]}>Moje Listy</Text>
+          <Text style={[styles.tabText, activeTab === 'my' && styles.activeTabText]}>My Lists</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'search' && styles.activeTab]} 
           onPress={() => setActiveTab('search')}
         >
-          <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>Wyszukaj</Text>
+          <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>Search</Text>
         </TouchableOpacity>
       </View>
 
@@ -116,7 +116,7 @@ export default function ListsScreen({ navigation }) {
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Szukaj list..."
+            placeholder="Search lists..."
             placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -145,8 +145,8 @@ export default function ListsScreen({ navigation }) {
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
                 {activeTab === 'search' 
-                  ? (searchQuery ? 'Brak wyników wyszukiwania' : 'Wpisz frazę aby wyszukać') 
-                  : 'Nie masz jeszcze żadnych list'}
+                  ? (searchQuery ? 'No search results' : 'Type to search') 
+                  : 'You have no lists yet'}
               </Text>
             </View>
           }

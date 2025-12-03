@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, TextInput, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
@@ -22,13 +22,19 @@ export default function ListDetailScreen({ route, navigation }) {
   const loadListDetails = async () => {
     try {
       const data = await listService.getListDetails(listId);
+
+      // Sort items by position
+      if (data.list_items) {
+        data.list_items.sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
+      }
+
       setList(data);
       setEditTitle(data.title);
       setEditDescription(data.description || '');
       setLocalItems(data.list_items || []);
     } catch (error) {
       console.error(error);
-      Alert.alert('Błąd', 'Nie udało się pobrać szczegółów listy');
+      Alert.alert('Error', 'Failed to load list details');
     } finally {
       setLoading(false);
     }
@@ -55,9 +61,9 @@ export default function ListDetailScreen({ route, navigation }) {
 
       setIsEditing(false);
       loadListDetails(); // Reload to get fresh data
-      Alert.alert('Sukces', 'Lista została zaktualizowana');
+      Alert.alert('Success', 'List updated successfully');
     } catch (error) {
-      Alert.alert('Błąd', error.message);
+      Alert.alert('Error', error.message);
       setLoading(false);
     }
   };
@@ -74,19 +80,19 @@ export default function ListDetailScreen({ route, navigation }) {
 
   const handleDeleteList = () => {
     Alert.alert(
-      'Usuń listę',
-      'Czy na pewno chcesz usunąć tę listę? Tej operacji nie można cofnąć.',
+      'Delete List',
+      'Are you sure you want to delete this list? This action cannot be undone.',
       [
-        { text: 'Anuluj', style: 'cancel' },
+        { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'Usuń', 
+          text: 'Delete', 
           style: 'destructive',
           onPress: async () => {
             try {
               await listService.deleteList(listId);
               navigation.goBack();
             } catch (error) {
-              Alert.alert('Błąd', error.message);
+              Alert.alert('Error', error.message);
             }
           }
         }
@@ -96,13 +102,18 @@ export default function ListDetailScreen({ route, navigation }) {
 
   const renderItem = ({ item, index }) => (
     <View style={styles.itemCard}>
-      <View style={styles.itemIcon}>
-        <Ionicons 
-          name={item.type === 'album' ? 'disc' : item.type === 'artist' ? 'person' : 'musical-note'} 
-          size={24} 
-          color={colors.primary} 
-        />
-      </View>
+      <Text style={styles.itemPosition}>{index + 1}</Text>
+      {item.cover ? (
+        <Image source={{ uri: item.cover }} style={styles.itemImage} />
+      ) : (
+        <View style={styles.itemIcon}>
+          <Ionicons 
+            name={item.type === 'album' ? 'disc' : item.type === 'artist' ? 'person' : 'musical-note'} 
+            size={24} 
+            color={colors.primary} 
+          />
+        </View>
+      )}
       <View style={styles.itemContent}>
         <Text style={styles.itemName}>{item.item_name}</Text>
         <Text style={styles.itemSubtext}>{item.artist_name || item.type}</Text>
@@ -155,7 +166,7 @@ export default function ListDetailScreen({ route, navigation }) {
             style={[commonStyles.headerTitle, styles.headerInput]}
             value={editTitle}
             onChangeText={setEditTitle}
-            placeholder="Tytuł listy"
+            placeholder="List Title"
             placeholderTextColor={colors.textSecondary}
           />
         ) : (
@@ -187,7 +198,7 @@ export default function ListDetailScreen({ route, navigation }) {
               style={styles.descriptionInput}
               value={editDescription}
               onChangeText={setEditDescription}
-              placeholder="Opis listy (opcjonalnie)"
+              placeholder="List Description (optional)"
               placeholderTextColor={colors.textSecondary}
               multiline
             />
@@ -207,7 +218,7 @@ export default function ListDetailScreen({ route, navigation }) {
           contentContainerStyle={styles.listContainer}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Ta lista jest pusta</Text>
+              <Text style={styles.emptyText}>This list is empty</Text>
             </View>
           }
         />
@@ -254,6 +265,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
   },
+  itemPosition: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 10,
+    minWidth: 20,
+    textAlign: 'center',
+  },
   itemIcon: {
     width: 40,
     height: 40,
@@ -262,6 +281,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+  },
+  itemImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 4,
+    marginRight: 12,
+    backgroundColor: colors.cardDark,
   },
   itemContent: {
     flex: 1,

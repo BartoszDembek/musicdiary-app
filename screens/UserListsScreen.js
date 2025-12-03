@@ -47,12 +47,15 @@ export default function UserListsScreen({ navigation, route }) {
   const handleListPress = async (list) => {
     if (mode === 'select' && itemToAdd) {
       try {
-        await listService.addListItem(list.id, itemToAdd);
-        Alert.alert('Sukces', 'Dodano do listy', [
+        const currentItems = list.items || list.list_items || [];
+        const newItem = { ...itemToAdd, position: currentItems.length };
+        
+        await listService.addListItem(list.id, newItem);
+        Alert.alert('Success', 'Added to list', [
           { text: 'OK', onPress: () => navigation.goBack() }
         ]);
       } catch (error) {
-        Alert.alert('Błąd', error.message);
+        Alert.alert('Error', error.message);
       }
     } else {
       navigation.navigate('ListDetail', { listId: list.id, title: list.title });
@@ -76,7 +79,7 @@ export default function UserListsScreen({ navigation, route }) {
         <Text style={styles.listDescription} numberOfLines={2}>{item.description}</Text>
       ) : null}
       <Text style={styles.itemCount}>
-        {item.items ? item.items.length : 0} elementów
+        {item.items ? item.list_items.length : 0} items
       </Text>
     </TouchableOpacity>
   );
@@ -88,7 +91,7 @@ export default function UserListsScreen({ navigation, route }) {
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={commonStyles.headerTitle}>
-          {mode === 'select' ? 'Wybierz listę' : 'Moje Listy'}
+          {mode === 'select' ? 'Select List' : 'My Lists'}
         </Text>
         <View style={{ width: 24 }} />
       </View>
@@ -108,7 +111,7 @@ export default function UserListsScreen({ navigation, route }) {
           }
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Nie masz jeszcze żadnych list</Text>
+              <Text style={styles.emptyText}>You have no lists yet</Text>
             </View>
           }
         />

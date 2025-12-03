@@ -16,18 +16,18 @@ export default function CreateListScreen({ navigation }) {
 
   const handleCreate = async () => {
     if (!title.trim()) {
-      Alert.alert('Błąd', 'Proszę podać tytuł listy');
+      Alert.alert('Error', 'Please enter a list title');
       return;
     }
 
     setLoading(true);
     try {
       await listService.createList(user.id, title, description, isPublic);
-      Alert.alert('Sukces', 'Lista została utworzona', [
+      Alert.alert('Success', 'List created successfully', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } catch (error) {
-      Alert.alert('Błąd', error.message);
+      Alert.alert('Error', error.message);
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ export default function CreateListScreen({ navigation }) {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={commonStyles.headerTitle}>Nowa Lista</Text>
+        <Text style={commonStyles.headerTitle}>New List</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -49,23 +49,23 @@ export default function CreateListScreen({ navigation }) {
       >
         <ScrollView contentContainerStyle={styles.formContainer}>
           <View style={styles.inputGroup}>
-            <Text style={commonStyles.inputLabel}>Tytuł</Text>
+            <Text style={commonStyles.inputLabel}>Title</Text>
             <TextInput
               style={commonStyles.input}
               value={title}
               onChangeText={setTitle}
-              placeholder="Np. Ulubione albumy 2024"
+              placeholder="Ex. Favorite Albums 2024"
               placeholderTextColor={colors.textMuted}
             />
           </View>
 
           <View style={styles.inputGroup}>
-            <Text style={commonStyles.inputLabel}>Opis (opcjonalnie)</Text>
+            <Text style={commonStyles.inputLabel}>Description (optional)</Text>
             <TextInput
               style={[commonStyles.input, styles.textArea]}
               value={description}
               onChangeText={setDescription}
-              placeholder="Krótki opis listy..."
+              placeholder="Short description..."
               placeholderTextColor={colors.textMuted}
               multiline
               numberOfLines={4}
@@ -75,9 +75,9 @@ export default function CreateListScreen({ navigation }) {
 
           <View style={styles.switchContainer}>
             <View>
-              <Text style={styles.switchLabel}>Lista publiczna</Text>
+              <Text style={styles.switchLabel}>Public List</Text>
               <Text style={styles.switchDescription}>
-                {isPublic ? 'Wszyscy mogą zobaczyć tę listę' : 'Tylko Ty widzisz tę listę'}
+                {isPublic ? 'Everyone can see this list' : 'Only you can see this list'}
               </Text>
             </View>
             <Switch
@@ -96,7 +96,7 @@ export default function CreateListScreen({ navigation }) {
             {loading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={commonStyles.primaryButtonText}>Utwórz listę</Text>
+              <Text style={commonStyles.primaryButtonText}>Create List</Text>
             )}
           </TouchableOpacity>
         </ScrollView>
