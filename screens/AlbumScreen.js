@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -122,11 +123,11 @@ const AlbumScreen = ({ route }) => {
                   userId: user.id, 
                   mode: 'select',
                   itemToAdd: {
-                    spotifyId: albumId,
-                    name: album.name,
+                    spotify_id: albumId,
+                    item_name: album.name,
                     type: 'album',
-                    artistName: album.artists.map(a => a.name).join(', '),
-                    imageUrl: album.images[0]?.url
+                    artist_name: album.artists.map(a => a.name).join(', '),
+                    cover: album.images[0]?.url
                   }
                 })} style={styles.iconButton}>
                   <Ionicons name="list" size={24} color={colors.primary} />

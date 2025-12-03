@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { commonStyles } from '../theme/commonStyles';
@@ -58,8 +59,8 @@ export default function ListDetailScreen({ route, navigation }) {
         />
       </View>
       <View style={styles.itemContent}>
-        <Text style={styles.itemName}>{item.name}</Text>
-        <Text style={styles.itemSubtext}>{item.artistName || item.type}</Text>
+        <Text style={styles.itemName}>{item.item_name}</Text>
+        <Text style={styles.itemSubtext}>{item.artist_name || item.type}</Text>
       </View>
     </View>
   );
@@ -73,7 +74,7 @@ export default function ListDetailScreen({ route, navigation }) {
   }
 
   return (
-    <View style={commonStyles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <View style={commonStyles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
@@ -92,7 +93,7 @@ export default function ListDetailScreen({ route, navigation }) {
         ) : null}
 
         <FlatList
-          data={list?.items || []}
+          data={list?.list_items || []}
           renderItem={renderItem}
           keyExtractor={(item, index) => item.id?.toString() || index.toString()}
           contentContainerStyle={styles.listContainer}
@@ -103,7 +104,7 @@ export default function ListDetailScreen({ route, navigation }) {
           }
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, Alert, ScrollView, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, Alert, ScrollView, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
@@ -128,11 +129,11 @@ const TrackScreen = ({ route }) => {
                   userId: user.id, 
                   mode: 'select',
                   itemToAdd: {
-                    spotifyId: trackId,
-                    name: track.name,
+                    spotify_id: trackId,
+                    item_name: track.name,
                     type: 'track',
-                    artistName: track.artists.map(a => a.name).join(', '),
-                    imageUrl: track.album.images[0]?.url
+                    artist_name: track.artists.map(a => a.name).join(', '),
+                    cover: track.album.images[0]?.url
                   }
                 })} style={styles.iconButton}>
                   <Ionicons name="list" size={24} color={colors.primary} />

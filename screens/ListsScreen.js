@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, TextInput, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
@@ -9,7 +10,7 @@ import { listService } from '../services/listService';
 
 export default function ListsScreen({ navigation }) {
   const { user } = useAuth();
-  const [viewMode, setViewMode] = useState('my-lists'); // 'my-lists' | 'search'
+  const [activeTab, setActiveTab] = useState('my'); // 'my' | 'search'
   const [searchQuery, setSearchQuery] = useState('');
   const [lists, setLists] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -44,29 +45,21 @@ export default function ListsScreen({ navigation }) {
 
   useFocusEffect(
     useCallback(() => {
-      if (viewMode === 'my-lists') {
+      if (activeTab === 'my') {
         loadMyLists();
+      } else {
+        setLists([]);
+        setSearchQuery('');
       }
-    }, [user?.id, viewMode])
+    }, [user?.id, activeTab])
   );
 
   const onRefresh = () => {
     setRefreshing(true);
-    if (viewMode === 'my-lists') {
+    if (activeTab === 'my') {
       loadMyLists();
     } else {
       searchLists();
-    }
-  };
-
-  const toggleSearch = () => {
-    if (viewMode === 'my-lists') {
-      setViewMode('search');
-      setLists([]);
-    } else {
-      setViewMode('my-lists');
-      setSearchQuery('');
-      loadMyLists();
     }
   };
 
@@ -88,7 +81,7 @@ export default function ListsScreen({ navigation }) {
       ) : null}
       <View style={styles.listFooter}>
         <Text style={styles.itemCount}>
-          {item.items ? item.items.length : 0} elementów
+          {(item.items || item.list_items || []).length} elementów
         </Text>
         {item.username && (
           <Text style={styles.authorName}>by {item.username}</Text>
@@ -98,35 +91,41 @@ export default function ListsScreen({ navigation }) {
   );
 
   return (
-    <View style={commonStyles.container}>
+    <SafeAreaView style={commonStyles.container}>
       <View style={commonStyles.header}>
-        {viewMode === 'search' ? (
-          <View style={styles.searchContainer}>
-            <TouchableOpacity onPress={toggleSearch}>
-              <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-            </TouchableOpacity>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Szukaj list..."
-              placeholderTextColor={colors.textMuted}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              onSubmitEditing={searchLists}
-              autoFocus
-            />
-            <TouchableOpacity onPress={searchLists}>
-              <Ionicons name="search" size={24} color={colors.primary} />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            <Text style={commonStyles.headerTitle}>Listy</Text>
-            <TouchableOpacity onPress={toggleSearch} style={styles.iconButton}>
-              <Ionicons name="search" size={24} color={colors.primary} />
-            </TouchableOpacity>
-          </>
-        )}
+        <Text style={commonStyles.headerTitle}>Listy</Text>
       </View>
+
+      <View style={styles.tabContainer}>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'my' && styles.activeTab]} 
+          onPress={() => setActiveTab('my')}
+        >
+          <Text style={[styles.tabText, activeTab === 'my' && styles.activeTabText]}>Moje Listy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.tab, activeTab === 'search' && styles.activeTab]} 
+          onPress={() => setActiveTab('search')}
+        >
+          <Text style={[styles.tabText, activeTab === 'search' && styles.activeTabText]}>Wyszukaj</Text>
+        </TouchableOpacity>
+      </View>
+
+      {activeTab === 'search' && (
+        <View style={styles.searchContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Szukaj list..."
+            placeholderTextColor={colors.textMuted}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            onSubmitEditing={searchLists}
+          />
+          <TouchableOpacity onPress={searchLists} style={styles.searchButton}>
+            <Ionicons name="search" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+      )}
 
       {loading ? (
         <View style={styles.centerContainer}>
@@ -144,7 +143,7 @@ export default function ListsScreen({ navigation }) {
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
-                {viewMode === 'search' 
+                {activeTab === 'search' 
                   ? (searchQuery ? 'Brak wyników wyszukiwania' : 'Wpisz frazę aby wyszukać') 
                   : 'Nie masz jeszcze żadnych list'}
               </Text>
@@ -153,7 +152,7 @@ export default function ListsScreen({ navigation }) {
         />
       )}
 
-      {viewMode === 'my-lists' && (
+      {activeTab === 'my' && (
         <TouchableOpacity 
           style={styles.fab}
           onPress={() => navigation.navigate('CreateList')}
@@ -161,7 +160,7 @@ export default function ListsScreen({ navigation }) {
           <Ionicons name="add" size={30} color="#FFF" />
         </TouchableOpacity>
       )}
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -171,21 +170,45 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchContainer: {
+  tabContainer: {
+    flexDirection: 'row',
+    padding: 10,
+    gap: 10,
+  },
+  tab: {
     flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: colors.primary,
+  },
+  tabText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    fontWeight: '600',
+  },
+  activeTabText: {
+    color: colors.primary,
+  },
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
     gap: 10,
   },
   searchInput: {
     flex: 1,
     backgroundColor: colors.inputBg,
     borderRadius: 8,
-    padding: 8,
+    padding: 12,
     color: colors.textPrimary,
     fontSize: 16,
   },
-  iconButton: {
+  searchButton: {
     padding: 8,
   },
   listContainer: {
