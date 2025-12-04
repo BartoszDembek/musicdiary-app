@@ -38,7 +38,19 @@ const StatsDetailScreen = () => {
   };
 
   const renderReviewItem = (review) => (
-    <View key={review.id} style={styles.listItem}>
+    <Pressable 
+      key={review.id} 
+      style={styles.listItem}
+      onPress={() => {
+        if (review.spotify_id) {
+          if (review.types === 'album') {
+            navigation.navigate('Album', { albumId: review.spotify_id });
+          } else if (review.types === 'song' || review.types === 'track') {
+            navigation.navigate('Track', { trackId: review.spotify_id });
+          }
+        }
+      }}
+    >
       <View style={styles.itemContent}>
         <Text style={styles.itemTitle}>{review.item_name || 'Unknown'}</Text>
         <Text style={styles.itemSubtitle}>{review.artist_name || 'Unknown artist'}</Text>
@@ -59,7 +71,8 @@ const StatsDetailScreen = () => {
         )}
         <Text style={styles.dateText}>{formatDate(review.created_at)}</Text>
       </View>
-    </View>
+      <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+    </Pressable>
   );
 
   const renderFollowerItem = (follower) => (
@@ -67,8 +80,9 @@ const StatsDetailScreen = () => {
       key={follower.id} 
       style={styles.listItem}
       onPress={() => {
-        if (follower.user_id) {
-          navigation.navigate('UserProfile', { userId: follower.user_id });
+        const targetId = follower.user_id || follower.id;
+        if (targetId) {
+          navigation.navigate('UserProfile', { userId: targetId });
         }
       }}
     >
@@ -103,10 +117,15 @@ const StatsDetailScreen = () => {
         key={following.id} 
         style={styles.listItem}
         onPress={() => {
-          if (isArtist && following.spotify_id) {
-            navigation.navigate('Artist', { artistId: following.spotify_id });
-          } else if (isUser && following.user_id) {
-            navigation.navigate('UserProfile', { userId: following.user_id });
+          console.log('Following item pressed:', following);
+          console.log('Is artist:', isArtist, 'Is user:', isUser);
+          if (isArtist && following.id) {
+            navigation.navigate('Artist', { artistId: following.id });
+          } else if (isUser) {
+            const targetId = following.id;
+            if (targetId) {
+              navigation.navigate('UserProfile', { userId: targetId });
+            }
           }
         }}
       >
@@ -143,6 +162,7 @@ const StatsDetailScreen = () => {
       switch (type) {
         case 'album': return 'Album';
         case 'track': return 'Track';
+        case 'song': return 'Track';
         case 'artist': return 'Artist';
         default: return 'Item';
       }
@@ -153,13 +173,12 @@ const StatsDetailScreen = () => {
         key={favorite.id} 
         style={styles.listItem}
         onPress={() => {
-          if (favorite.spotify_id) {
-            if (favorite.type === 'album') {
-              navigation.navigate('Album', { albumId: favorite.spotify_id });
-            } else if (favorite.type === 'track') {
-              navigation.navigate('Track', { trackId: favorite.spotify_id });
-            } else if (favorite.type === 'artist') {
-              navigation.navigate('Artist', { artistId: favorite.spotify_id });
+          console.log('Favorite item pressed:', favorite);
+          if (favorite.id) {
+            if (favorite.types === 'album') {
+              navigation.navigate('Album', { albumId: favorite.id });
+            } else if (favorite.types === 'song') {
+              navigation.navigate('Track', { trackId: favorite.id });
             }
           }
         }}

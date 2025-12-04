@@ -93,6 +93,10 @@ function Navigation() {
             <Stack.Screen name="UserLists" component={UserListsScreen} />
             <Stack.Screen name="CreateList" component={CreateListScreen} />
             <Stack.Screen name="ListDetail" component={ListDetailScreen} />
+            <Stack.Screen name="Album" component={AlbumScreen} />
+            <Stack.Screen name="Artist" component={ArtistScreen} />
+            <Stack.Screen name="Track" component={TrackScreen} />
+            <Stack.Screen name="UserProfile" component={UserProfileScreen} />
           </>
         ) : (
           // Non-authenticated stack
