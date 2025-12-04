@@ -45,8 +45,8 @@ const FollowerItem = ({ follower }) => {
     );
   }
 
-  const displayUsername = userInfo?.username || follower.user_name || 'Unknown user';
-  const displayAvatar = userInfo?.avatar || follower.avatar;
+  const displayUsername = userInfo?.username || 'Unknown user';
+  const displayAvatar = userInfo?.avatar || null;
 
   return (
     <Pressable 
@@ -287,9 +287,9 @@ const StatsDetailScreen = () => {
           }
         }}
       >
-        {favorite.image_url ? (
+        {favorite.image ? (
           <Image 
-            source={{ uri: favorite.image_url }} 
+            source={{ uri: favorite.image }} 
             style={styles.favoriteImage}
           />
         ) : (

@@ -65,7 +65,7 @@ const AlbumScreen = ({ route }) => {
       if (isFavorite) {
         updatedProfile = await favoriteService.removeFavorite(user.id, albumId);
       } else {
-        updatedProfile = await favoriteService.addFavorite(user.id, albumId, artistName, albumName, 'album');
+        updatedProfile = await favoriteService.addFavorite(user.id, albumId, artistName, albumName, 'album', album.images[0]?.url);
       }
           
       if (updatedProfile) {
