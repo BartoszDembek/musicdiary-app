@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, commonStyles } from '../theme';
 import { userService } from '../services/userService';
+import { spotifyService } from '../services/spotifyService';
 
 const FollowerItem = ({ follower }) => {
   const navigation = useNavigation();
@@ -89,7 +90,16 @@ const FollowingItem = ({ following }) => {
 
   useEffect(() => {
     const loadInfo = async () => {
-      if (!isArtist) {
+      if (isArtist) {
+        try {
+          const artistData = await spotifyService.getArtistByID(following.id);
+          if (artistData) {
+            setUserInfo(artistData);
+          }
+        } catch (error) {
+          console.error('Error loading artist info:', error);
+        }
+      } else {
         const targetId = following.id;
         if (targetId) {
            const info = await userService.getFollowerInfo(targetId);
@@ -129,8 +139,8 @@ const FollowingItem = ({ following }) => {
   let typeLabel = 'User';
 
   if (isArtist) {
-      displayName = following.artist_name;
-      displayImage = following.image_url;
+      displayName = userInfo?.name || 'Unknown artist';
+      displayImage = userInfo?.images?.[0]?.url || null;
       typeLabel = 'Artist';
   } else {
       displayName = userInfo?.username || 'Unknown user';
