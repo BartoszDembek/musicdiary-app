@@ -98,7 +98,7 @@ const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleCommen
   );
 };
 
-const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
+const ReviewSection = ({ userId, itemId, type, artistName, itemName,image }) => {
   const [userReview, setUserReview] = useState(null);
   const [allReviews, setAllReviews] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -127,7 +127,7 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName }) => {
 
   const handleSave = async () => {
     try {
-      await reviewService.saveReview(userId, itemId, review, type, rating, artistName, itemName);
+      await reviewService.saveReview(userId, itemId, review, type, rating, artistName, itemName, image);
       setIsModalVisible(false);
       loadReviews();
       if (user?.id) {

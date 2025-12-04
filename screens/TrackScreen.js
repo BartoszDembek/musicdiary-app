@@ -204,6 +204,7 @@ const TrackScreen = ({ route }) => {
               type="song" 
               artistName={track.artists.map(artist => artist.name).join(', ')}
               itemName={track.name}
+              image={track.album.images[0]?.url}
             />
           </View>
         </ScrollView>
