@@ -118,7 +118,6 @@ const UserProfileScreen = () => {
         title = 'Reviews';
         break;
       case 'followers':
-        // Mock data - do zaimplementowania w przyszłości
         data = userProfile?.followers || [];
         title = 'Followers';
         break;

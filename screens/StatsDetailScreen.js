@@ -1,8 +1,184 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { colors, commonStyles } from '../theme';
+import { userService } from '../services/userService';
+
+const FollowerItem = ({ follower }) => {
+  const navigation = useNavigation();
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadInfo = async () => {
+      const targetId = follower.user_id || follower.id;
+      if (targetId) {
+        const info = await userService.getFollowerInfo(targetId);
+        if (info) {
+          setUserInfo(info);
+        }
+      }
+      setLoading(false);
+    };
+    loadInfo();
+  }, [follower]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.listItem}>
+        <View style={[styles.avatarContainer, { backgroundColor: colors.skeleton }]} />
+        <View style={styles.itemContent}>
+          <View style={{ width: '60%', height: 16, backgroundColor: colors.skeleton, marginBottom: 8, borderRadius: 4 }} />
+          <View style={{ width: '40%', height: 12, backgroundColor: colors.skeleton, borderRadius: 4 }} />
+        </View>
+      </View>
+    );
+  }
+
+  const displayUsername = userInfo?.username || follower.user_name || 'Unknown user';
+  const displayAvatar = userInfo?.avatar || follower.avatar;
+
+  return (
+    <Pressable 
+      style={styles.listItem}
+      onPress={() => {
+        const targetId = follower.user_id || follower.id;
+        if (targetId) {
+          navigation.navigate('UserProfile', { userId: targetId });
+        }
+      }}
+    >
+      <View style={styles.avatarContainer}>
+        {displayAvatar && displayAvatar !== "NULL" ? (
+          <Image 
+            source={{ uri: displayAvatar }} 
+            style={styles.avatarImage}
+          />
+        ) : (
+          <Text style={styles.avatarText}>
+            {displayUsername ? displayUsername[0].toUpperCase() : '?'}
+          </Text>
+        )}
+      </View>
+      <View style={styles.itemContent}>
+        <Text style={styles.itemTitle}>{displayUsername}</Text>
+        {follower.createdAt && (
+          <Text style={styles.dateText}>Following since {formatDate(follower.createdAt)}</Text>
+        )}
+      </View>
+      <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+    </Pressable>
+  );
+};
+
+const FollowingItem = ({ following }) => {
+  const navigation = useNavigation();
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const isArtist = following.artist_name;
+
+  useEffect(() => {
+    const loadInfo = async () => {
+      if (!isArtist) {
+        const targetId = following.id;
+        if (targetId) {
+           const info = await userService.getFollowerInfo(targetId);
+           if (info) {
+             setUserInfo(info);
+           }
+        }
+      }
+      setLoading(false);
+    };
+    loadInfo();
+  }, [following, isArtist]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.listItem}>
+        <View style={[styles.avatarContainer, { backgroundColor: colors.skeleton }]} />
+        <View style={styles.itemContent}>
+          <View style={{ width: '60%', height: 16, backgroundColor: colors.skeleton, marginBottom: 8, borderRadius: 4 }} />
+          <View style={{ width: '40%', height: 12, backgroundColor: colors.skeleton, borderRadius: 4 }} />
+        </View>
+      </View>
+    );
+  }
+
+  let displayName = 'Unknown';
+  let displayImage = null;
+  let typeLabel = 'User';
+
+  if (isArtist) {
+      displayName = following.artist_name;
+      displayImage = following.image_url;
+      typeLabel = 'Artist';
+  } else {
+      displayName = userInfo?.username || 'Unknown user';
+      displayImage = userInfo?.avatar || null;
+      typeLabel = 'User';
+  }
+
+  return (
+      <Pressable 
+        style={styles.listItem}
+        onPress={() => {
+          if (isArtist && following.id) {
+            navigation.navigate('Artist', { artistId: following.id });
+          } else {
+            const targetId = following.user_id || following.id;
+            if (targetId) {
+              navigation.navigate('UserProfile', { userId: targetId });
+            }
+          }
+        }}
+      >
+        {displayImage && displayImage !== "NULL" ? (
+          <Image 
+            source={{ uri: displayImage }} 
+            style={isArtist ? styles.artistImage : styles.avatarImage}
+          />
+        ) : (
+          <View style={styles.avatarContainer}>
+            <Text style={styles.avatarText}>
+              {displayName ? displayName[0].toUpperCase() : '?'}
+            </Text>
+          </View>
+        )}
+        <View style={styles.itemContent}>
+          <Text style={styles.itemTitle}>
+            {displayName}
+          </Text>
+          <Text style={styles.itemSubtitle}>
+            {typeLabel}
+          </Text>
+          {following.createdAt && (
+            <Text style={styles.dateText}>Following since {formatDate(following.createdAt)}</Text>
+          )}
+        </View>
+        <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
+      </Pressable>
+  );
+};
 
 const StatsDetailScreen = () => {
   const navigation = useNavigation();
@@ -51,6 +227,16 @@ const StatsDetailScreen = () => {
         }
       }}
     >
+      {review.image ? (
+        <Image 
+          source={{ uri: review.image }} 
+          style={styles.favoriteImage}
+        />
+      ) : (
+        <View style={styles.placeholderImage}>
+          <Ionicons name="musical-notes" size={32} color={colors.textSecondary} />
+        </View>
+      )}
       <View style={styles.itemContent}>
         <Text style={styles.itemTitle}>{review.item_name || 'Unknown'}</Text>
         <Text style={styles.itemSubtitle}>{review.artist_name || 'Unknown artist'}</Text>
@@ -74,88 +260,6 @@ const StatsDetailScreen = () => {
       <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
     </Pressable>
   );
-
-  const renderFollowerItem = (follower) => (
-    <Pressable 
-      key={follower.id} 
-      style={styles.listItem}
-      onPress={() => {
-        const targetId = follower.user_id || follower.id;
-        if (targetId) {
-          navigation.navigate('UserProfile', { userId: targetId });
-        }
-      }}
-    >
-      <View style={styles.avatarContainer}>
-        {follower.avatar && follower.avatar !== "NULL" ? (
-          <Image 
-            source={{ uri: follower.avatar }} 
-            style={styles.avatarImage}
-          />
-        ) : (
-          <Text style={styles.avatarText}>
-            {follower.user_name ? follower.user_name[0].toUpperCase() : '?'}
-          </Text>
-        )}
-      </View>
-      <View style={styles.itemContent}>
-        <Text style={styles.itemTitle}>{follower.user_name || 'Unknown user'}</Text>
-        {follower.createdAt && (
-          <Text style={styles.dateText}>Following since {formatDate(follower.createdAt)}</Text>
-        )}
-      </View>
-      <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-    </Pressable>
-  );
-
-  const renderFollowingItem = (following) => {
-    const isArtist = following.artist_name;
-    const isUser = following.user_name;
-    
-    return (
-      <Pressable 
-        key={following.id} 
-        style={styles.listItem}
-        onPress={() => {
-          console.log('Following item pressed:', following);
-          console.log('Is artist:', isArtist, 'Is user:', isUser);
-          if (isArtist && following.id) {
-            navigation.navigate('Artist', { artistId: following.id });
-          } else if (isUser) {
-            const targetId = following.id;
-            if (targetId) {
-              navigation.navigate('UserProfile', { userId: targetId });
-            }
-          }
-        }}
-      >
-        {following.image_url ? (
-          <Image 
-            source={{ uri: following.image_url }} 
-            style={isArtist ? styles.artistImage : styles.avatarImage}
-          />
-        ) : (
-          <View style={styles.avatarContainer}>
-            <Text style={styles.avatarText}>
-              {(isArtist ? following.artist_name : following.user_name)?.[0]?.toUpperCase() || '?'}
-            </Text>
-          </View>
-        )}
-        <View style={styles.itemContent}>
-          <Text style={styles.itemTitle}>
-            {isArtist ? following.artist_name : following.user_name || 'Unknown'}
-          </Text>
-          <Text style={styles.itemSubtitle}>
-            {isArtist ? 'Artist' : 'User'}
-          </Text>
-          {following.createdAt && (
-            <Text style={styles.dateText}>Following since {formatDate(following.createdAt)}</Text>
-          )}
-        </View>
-        <Ionicons name="chevron-forward" size={24} color={colors.textSecondary} />
-      </Pressable>
-    );
-  };
 
   const renderFavoriteItem = (favorite) => {
     const getTypeLabel = (type) => {
@@ -230,9 +334,9 @@ const StatsDetailScreen = () => {
       case 'reviews':
         return sortedData.map(renderReviewItem);
       case 'followers':
-        return sortedData.map(renderFollowerItem);
+        return sortedData.map((follower) => <FollowerItem key={follower.id} follower={follower} />);
       case 'following':
-        return sortedData.map(renderFollowingItem);
+        return sortedData.map((following) => <FollowingItem key={following.id} following={following} />);
       case 'favorites':
         return sortedData.map(renderFavoriteItem);
       default:

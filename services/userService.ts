@@ -30,5 +30,15 @@ export const userService = {
               throw new Error('Request failed');
             }
         }
+    },
+
+    getFollowerInfo: async (userId) => {
+        try {
+            const response = await axios.get(`${API_URL}/user/follower-info/${userId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching follower info:', error);
+            return null;
+        }
     }
 };
