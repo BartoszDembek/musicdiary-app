@@ -65,7 +65,7 @@ const TrackScreen = ({ route }) => {
       if (isFavorite) {
         updatedProfile = await favoriteService.removeFavorite(user.id, trackId);
       } else {
-        updatedProfile = await favoriteService.addFavorite(user.id, trackId, artistName, albumName);
+        updatedProfile = await favoriteService.addFavorite(user.id, trackId, artistName, albumName, 'song');
       }
               
       if (updatedProfile) {

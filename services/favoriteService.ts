@@ -2,12 +2,13 @@ import axios from 'axios';
 const API_URL = 'https://musicdiary-backend-puce.vercel.app'
 
 export const favoriteService = {
-    addFavorite: async (userId: string, trackId: string, artistName?: string, albumName?: string) => {
+    addFavorite: async (userId: string, trackId: string, artistName?: string, albumName?: string, type?: string) => {
         try {
             const url = `${API_URL}/favorites/add/${userId}?id=${trackId}`;
-            const body: { artistName?: string; albumName?: string } = {};
+            const body: { artistName?: string; albumName?: string; type?: string } = {};
             if (artistName) body.artistName = artistName;
             if (albumName) body.albumName = albumName;
+            if (type) body.type = type;
             const response = await axios.post(url, body);
             return response.data;
         } catch (error) {
