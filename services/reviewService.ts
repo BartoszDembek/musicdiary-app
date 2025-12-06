@@ -87,7 +87,6 @@ export const reviewService = {
   getReviewScore: async (reviewId) => {
     try {
       const response = await axios.get(`${API_URL}/review/score/${reviewId}`);
-      console.log('Vote response:', response.data);
       return response.data;
     } catch (error) {
       console.error('Error getting review score:', error);
