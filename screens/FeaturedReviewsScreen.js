@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,100 +11,99 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-// Mock data for featured reviews
-const mockReviews = [
-  {
-    id: '1',
-    itemName: 'The Dark Side of the Moon',
-    artistName: 'Pink Floyd',
-    type: 'album',
-    rating: 5,
-    reviewText: 'An absolute masterpiece that transcends time and genre. Every track flows seamlessly into the next, creating a cohesive journey through sound and emotion. The production quality is unmatched.',
-    username: 'MusicLover92',
-    createdAt: '2024-10-01T10:30:00Z',
-    imageUrl: 'https://i.scdn.co/image/ab67616d0000b273ea7caaff71dea1051d49b2fe',
-    albumId: 'album1'
-  },
-  {
-    id: '2',
-    itemName: 'Bohemian Rhapsody',
-    artistName: 'Queen',
-    type: 'track',
-    rating: 5,
-    reviewText: 'A revolutionary piece of music that defies categorization. Freddie Mercury\'s vocals are otherworldly, and the song structure is unlike anything before or since.',
-    username: 'RockEnthusiast',
-    createdAt: '2024-09-30T15:45:00Z',
-    imageUrl: 'https://i.scdn.co/image/ab67616d0000b273ce4f1737bc8a646c8c4bd25a',
-    trackId: 'track1'
-  },
-  {
-    id: '3',
-    itemName: 'Radiohead',
-    artistName: 'Radiohead',
-    type: 'artist',
-    rating: 4,
-    reviewText: 'Consistently innovative throughout their career. From OK Computer to In Rainbows, they\'ve never stopped pushing boundaries and challenging listeners.',
-    username: 'IndieHead',
-    createdAt: '2024-09-29T09:15:00Z',
-    imageUrl: 'https://i.scdn.co/image/ab6761610000e5eb604c49444a0c7c48cdc7b7cc',
-    artistId: 'artist1'
-  },
-  {
-    id: '4',
-    itemName: 'Kind of Blue',
-    artistName: 'Miles Davis',
-    type: 'album',
-    rating: 5,
-    reviewText: 'The pinnacle of jazz music. Every musician on this record is at the top of their game. This album single-handedly defined cool jazz and modal jazz.',
-    username: 'JazzAficionado',
-    createdAt: '2024-09-28T20:00:00Z',
-    imageUrl: 'https://i.scdn.co/image/ab67616d0000b273e8b066f70c206551210d902b',
-    albumId: 'album2'
-  },
-  {
-    id: '5',
-    itemName: 'Billie Jean',
-    artistName: 'Michael Jackson',
-    type: 'track',
-    rating: 4,
-    reviewText: 'The perfect pop song. Infectious bassline, incredible vocals, and a music video that changed everything. Still sounds fresh after all these years.',
-    username: 'PopCritic',
-    createdAt: '2024-09-27T12:30:00Z',
-    imageUrl: 'https://i.scdn.co/image/ab67616d0000b2734a8d81263b91b3dcbd8f5b9e',
-    trackId: 'track2'
-  }
-];
+import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from '../context/AuthContext';
+import { reviewService } from '../services/reviewService';
+import { userService } from '../services/userService';
+import { colors } from '../theme/colors';
 
 const FeaturedReviewsScreen = ({ navigation }) => {
+  const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
+  const [filteredReviews, setFilteredReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState('all'); // 'all' or 'following'
+  const [followingList, setFollowingList] = useState([]);
 
-  useEffect(() => {
-    loadFeaturedReviews();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [user?.id])
+  );
 
-  const loadFeaturedReviews = async () => {
+  // Filter reviews whenever activeTab, reviews, or followingList changes
+  React.useEffect(() => {
+    filterReviews();
+  }, [activeTab, reviews, followingList]);
+
+  const loadData = async () => {
     try {
       setLoading(true);
-      // Simulate API call delay
-      setTimeout(() => {
-        setReviews(mockReviews);
-        setLoading(false);
-      }, 1000);
+      await Promise.all([
+        loadFeaturedReviews(),
+        loadUserProfile()
+      ]);
     } catch (error) {
-      console.error('Error loading featured reviews:', error);
+      console.error('Error loading data:', error);
+    } finally {
       setLoading(false);
     }
   };
 
+  const loadUserProfile = async () => {
+    if (!user?.id) return;
+    try {
+      const profileData = await userService.getUserProfile(user.id);
+      // Assuming profileData[0] contains the user profile and 'following' array
+      // Adjust based on actual API response structure
+      if (profileData && profileData[0] && profileData[0].following) {
+        setFollowingList(profileData[0].following);
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error);
+    }
+  };
+
+  const loadFeaturedReviews = async () => {
+    try {
+      const data = await reviewService.getFeaturedReviews();
+      setReviews(data || []);
+    } catch (error) {
+      console.error('Error loading featured reviews:', error);
+      setReviews([]);
+    }
+  };
+
+  const filterReviews = () => {
+    if (!user) return;
+
+    let filtered = [];
+    
+    // First, filter out current user's reviews from all lists
+    const notMyReviews = reviews.filter(review => review.userId !== user.id);
+
+    if (activeTab === 'all') {
+      filtered = notMyReviews;
+    } else {
+      // Filter for following
+      // Check if followingList contains objects with userId or just IDs
+      // Assuming followingList is array of objects with userId property based on typical structure
+      // or array of strings. We'll handle both.
+      const followingIds = followingList.map(f => (typeof f === 'object' ? f.userId : f));
+      
+      filtered = notMyReviews.filter(review => 
+        followingIds.includes(review.userId)
+      );
+    }
+
+    setFilteredReviews(filtered);
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate refresh delay
-    setTimeout(() => {
-      setReviews([...mockReviews].sort(() => Math.random() - 0.5)); // Shuffle reviews
-      setRefreshing(false);
-    }, 1500);
+    await loadData();
+    setRefreshing(false);
   };
 
   const renderStars = (rating) => {
@@ -129,6 +128,11 @@ const FeaturedReviewsScreen = ({ navigation }) => {
       navigation.navigate('Artist', { artistId: review.artistId });
     } else if (review.trackId) {
       navigation.navigate('Track', { trackId: review.trackId });
+    } else if (review.spotifyId) {
+        // Fallback if specific ID fields aren't present but spotifyId is
+        if (review.type === 'album') navigation.navigate('Album', { albumId: review.spotifyId });
+        else if (review.type === 'artist') navigation.navigate('Artist', { artistId: review.spotifyId });
+        else if (review.type === 'track') navigation.navigate('Track', { trackId: review.spotifyId });
     }
   };
 
@@ -139,8 +143,8 @@ const FeaturedReviewsScreen = ({ navigation }) => {
     >
       <View style={styles.reviewHeader}>
         <View style={styles.itemInfo}>
-          {item.imageUrl && (
-            <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+          {item.image && (
+            <Image source={{ uri: item.image }} style={styles.itemImage} />
           )}
           <View style={styles.itemDetails}>
             <Text style={styles.itemName} numberOfLines={1}>
@@ -150,7 +154,7 @@ const FeaturedReviewsScreen = ({ navigation }) => {
               {item.artistName}
             </Text>
             <Text style={styles.itemType}>
-              {item.type === 'album' ? 'Album' : item.type === 'track' ? 'Track' : 'Artist'}
+              {item.types === 'album' ? 'Album' : item.types === 'track' ? 'Track' : 'Artist'}
             </Text>
           </View>
         </View>
@@ -164,26 +168,26 @@ const FeaturedReviewsScreen = ({ navigation }) => {
 
       <View style={styles.reviewContent}>
         <Text style={styles.reviewText} numberOfLines={3}>
-          {item.reviewText}
+          {item.text}
         </Text>
       </View>
 
       <View style={styles.reviewFooter}>
         <View style={styles.userInfo}>
           <Ionicons name="person-circle" size={20} color="#CDD6F4" />
-          <Text style={styles.username}>{item.username}</Text>
+          <Text style={styles.username}>{item.username || 'User'}</Text>
         </View>
         <Text style={styles.reviewDate}>
-          {new Date(item.createdAt).toLocaleDateString('en-US')}
+          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('pl-PL') : ''}
         </Text>
       </View>
     </TouchableOpacity>
   );
 
-  if (loading) {
+  if (loading && !refreshing && reviews.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#BB9AF7" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -195,11 +199,26 @@ const FeaturedReviewsScreen = ({ navigation }) => {
         <Text style={styles.headerSubtitle}>
           Latest reviews from the community
         </Text>
+        
+        <View style={styles.tabContainer}>
+          <TouchableOpacity 
+            style={[styles.tab, activeTab === 'all' && styles.activeTab]}
+            onPress={() => setActiveTab('all')}
+          >
+            <Text style={[styles.tabText, activeTab === 'all' && styles.activeTabText]}>All Recent</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.tab, activeTab === 'following' && styles.activeTab]}
+            onPress={() => setActiveTab('following')}
+          >
+            <Text style={[styles.tabText, activeTab === 'following' && styles.activeTabText]}>Following</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
-        data={reviews}
-        keyExtractor={(item) => item.id}
+        data={filteredReviews}
+        keyExtractor={(item) => item._id || item.id || Math.random().toString()}
         renderItem={renderReviewItem}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
@@ -207,8 +226,8 @@ const FeaturedReviewsScreen = ({ navigation }) => {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#BB9AF7"
-            colors={['#BB9AF7']}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
         ListEmptyComponent={
@@ -216,7 +235,9 @@ const FeaturedReviewsScreen = ({ navigation }) => {
             <Ionicons name="chatbubbles-outline" size={64} color="#6C7086" />
             <Text style={styles.emptyText}>No reviews to display</Text>
             <Text style={styles.emptySubtext}>
-              Check back later or add your first review
+              {activeTab === 'following' 
+                ? "Follow users to see their reviews here" 
+                : "Check back later or add your first review"}
             </Text>
           </View>
         }
@@ -228,41 +249,65 @@ const FeaturedReviewsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1E1E2E',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1E1E2E',
+    backgroundColor: colors.background,
   },
   header: {
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#414868',
+    borderBottomColor: colors.border,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#CDD6F4',
+    color: colors.textPrimary,
     marginBottom: 4,
   },
   headerSubtitle: {
     fontSize: 16,
-    color: '#9399B2',
+    color: colors.textSecondary,
+    marginBottom: 16,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    borderRadius: 8,
+    padding: 4,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  activeTab: {
+    backgroundColor: colors.primary,
+  },
+  tabText: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  activeTabText: {
+    color: '#FFFFFF',
   },
   listContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   reviewCard: {
-    backgroundColor: '#313244',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#414868',
+    borderColor: colors.border,
   },
   reviewHeader: {
     flexDirection: 'row',
@@ -288,17 +333,17 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#CDD6F4',
+    color: colors.textPrimary,
     marginBottom: 2,
   },
   itemArtist: {
     fontSize: 14,
-    color: '#9399B2',
+    color: colors.textSecondary,
     marginBottom: 2,
   },
   itemType: {
     fontSize: 12,
-    color: '#BB9AF7',
+    color: colors.primary,
     textTransform: 'uppercase',
     fontWeight: '500',
   },
@@ -312,7 +357,7 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#CDD6F4',
+    color: colors.textPrimary,
   },
   reviewContent: {
     marginBottom: 12,
@@ -320,7 +365,7 @@ const styles = StyleSheet.create({
   reviewText: {
     fontSize: 15,
     lineHeight: 22,
-    color: '#CDD6F4',
+    color: colors.textPrimary,
   },
   reviewFooter: {
     flexDirection: 'row',
@@ -328,7 +373,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#414868',
+    borderTopColor: colors.border,
   },
   userInfo: {
     flexDirection: 'row',
@@ -336,7 +381,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
-    color: '#9399B2',
+    color: colors.textSecondary,
     marginLeft: 6,
     fontWeight: '500',
   },
@@ -353,13 +398,13 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#CDD6F4',
+    color: colors.textPrimary,
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
-    color: '#9399B2',
+    color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
   },
