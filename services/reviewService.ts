@@ -6,10 +6,6 @@ const API_URL = 'https://musicdiary-backend-puce.vercel.app'
 export const reviewService = {
   saveReview: async (userId,spotifyId,text,types,rating,artistName,itemName,image) => {
     try {
-      // const key = `${type}_${itemId}`;
-      // await AsyncStorage.setItem(key, JSON.stringify(review));
-      // return true;
-
       const response = await axios.post(`${API_URL}/review/${userId}`, {
         spotifyId:spotifyId,
         text:text,

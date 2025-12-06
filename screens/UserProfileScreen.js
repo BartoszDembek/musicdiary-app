@@ -62,7 +62,6 @@ const UserProfileScreen = () => {
     try {
       setLoading(true);
       const profileData = await userService.getUserProfile(userId);
-      console.log('Loaded user profile data:', profileData[0]?.followers);
       if (profileData && profileData[0]) {
         setUserProfile(profileData[0]);
         checkIfFollowed();
@@ -210,7 +209,6 @@ const UserProfileScreen = () => {
             )}
           </View>
           <Text style={styles.userName}>{userProfile?.username || 'Unknown'}</Text>
-          <Text style={styles.userEmail}>{userProfile?.email || ''}</Text>
           <Text style={styles.joinDate}>
             {userProfile?.created_at ? formatJoinDate(userProfile.created_at) : ''}
           </Text>
