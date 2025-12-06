@@ -82,5 +82,30 @@ export const reviewService = {
       console.error('Error getting comments:', error);
       return [];
     }
+  },
+
+  getReviewScore: async (reviewId) => {
+    try {
+      const response = await axios.get(`${API_URL}/review/score/${reviewId}`);
+      console.log('Vote response:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Error getting review score:', error);
+      return { upvotes: 0, downvotes: 0 };
+    }
+  },
+
+  voteReview: async (userId, reviewId, type) => {
+    try {
+      const response = await axios.post(`${API_URL}/review/vote`, {
+        userId,
+        reviewId,
+        type
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error voting review:', error);
+      return null;
+    }
   }
 };

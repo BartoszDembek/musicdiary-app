@@ -69,7 +69,7 @@ const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleCommen
         </Text>
 
         <View style={styles.actionsContainer}>
-          <VoteSection />
+          <VoteSection reviewId={review.id} userId={userId} />
 
           <Pressable
             style={[styles.commentButton, showComments && styles.activeCommentButton]}

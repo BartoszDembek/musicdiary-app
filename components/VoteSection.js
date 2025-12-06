@@ -1,15 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { reviewService } from '../services/reviewService';
 
-const VoteSection = () => {
+const VoteSection = ({ reviewId, userId }) => {
   const [vote, setVote] = useState(0); // 0: none, 1: up, -1: down
+  const [scores, setScores] = useState({ upvotes: 0, downvotes: 0 });
 
-  const handleVote = (type) => {
+  useEffect(() => {
+    const fetchScores = async () => {
+      if (reviewId) {
+        const data = await reviewService.getReviewScore(reviewId);
+        if (data) {
+          const upvotes = Array.isArray(data.upvotes) ? data.upvotes : [];
+          const downvotes = Array.isArray(data.downvotes) ? data.downvotes : [];
+          
+          let userVote = 0;
+          if (userId) {
+             const hasUpvoted = upvotes.some(id => String(id) === String(userId));
+             const hasDownvoted = downvotes.some(id => String(id) === String(userId));
+
+             if (hasUpvoted) userVote = 1;
+             else if (hasDownvoted) userVote = -1;
+          }
+          
+          setVote(userVote);
+
+          // Store base scores (excluding current user's vote)
+          setScores({ 
+            upvotes: upvotes.length - (userVote === 1 ? 1 : 0), 
+            downvotes: downvotes.length - (userVote === -1 ? 1 : 0) 
+          });
+        }
+      }
+    };
+    fetchScores();
+  }, [reviewId, userId]);
+
+  const handleVote = async (type) => {
+    // Optimistic update
     if (type === 'up') {
       setVote(prev => prev === 1 ? 0 : 1);
     } else {
       setVote(prev => prev === -1 ? 0 : -1);
+    }
+
+    await reviewService.voteReview(userId, reviewId, type);
+    
+    // Refresh scores
+    const data = await reviewService.getReviewScore(reviewId);
+    if (data) {
+        const upvotes = Array.isArray(data.upvotes) ? data.upvotes : [];
+        const downvotes = Array.isArray(data.downvotes) ? data.downvotes : [];
+        
+        // Re-calculate user vote from server response to be sure
+        let userVote = 0;
+        if (userId) {
+            const hasUpvoted = upvotes.some(id => String(id) === String(userId));
+            const hasDownvoted = downvotes.some(id => String(id) === String(userId));
+            if (hasUpvoted) userVote = 1;
+            else if (hasDownvoted) userVote = -1;
+        }
+        
+        // Update base scores
+        setScores({ 
+            upvotes: upvotes.length - (userVote === 1 ? 1 : 0), 
+            downvotes: downvotes.length - (userVote === -1 ? 1 : 0) 
+        });
     }
   };
 
@@ -27,7 +84,7 @@ const VoteSection = () => {
           />
         </Pressable>
         <Text style={[styles.voteCount, vote === 1 && { color: "#7AA2F7" }]}>
-          {12 + (vote === 1 ? 1 : 0)}
+          {scores.upvotes + (vote === 1 ? 1 : 0)}
         </Text>
       </View>
 
@@ -43,7 +100,7 @@ const VoteSection = () => {
           />
         </Pressable>
         <Text style={[styles.voteCount, vote === -1 && { color: "#F7768E" }]}>
-          {3 + (vote === -1 ? 1 : 0)}
+          {scores.downvotes + (vote === -1 ? 1 : 0)}
         </Text>
       </View>
     </View>
