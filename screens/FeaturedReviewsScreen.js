@@ -55,10 +55,9 @@ const FeaturedReviewsScreen = ({ navigation }) => {
     if (!user?.id) return;
     try {
       const profileData = await userService.getUserProfile(user.id);
-      // Assuming profileData[0] contains the user profile and 'following' array
-      // Adjust based on actual API response structure
-      if (profileData && profileData[0] && profileData[0].following) {
-        setFollowingList(profileData[0].following);
+      // Access the nested follow array structure: profileData[0].follows[0].follow
+      if (profileData?.[0]?.follows?.[0]?.follow) {
+        setFollowingList(profileData[0].follows[0].follow);
       }
     } catch (error) {
       console.error('Error loading user profile:', error);
@@ -98,14 +97,18 @@ const FeaturedReviewsScreen = ({ navigation }) => {
       filtered = notMyReviews;
     } else {
       // Filter for following
-      // Check if followingList contains objects with userId or just IDs
-      // Assuming followingList is array of objects with userId property based on typical structure
-      // or array of strings. We'll handle both.
-      const followingIds = followingList.map(f => (typeof f === 'object' ? f.userId : f));
+      // Map following list to usernames as requested
+      const followingUsernames = followingList.map(f => {
+        if (typeof f === 'object') {
+          return f.user_name || f.target_user_name || f.username;
+        }
+        return null;
+      }).filter(Boolean);
       
-      filtered = notMyReviews.filter(review => 
-        followingIds.includes(getAuthorId(review))
-      );
+      filtered = notMyReviews.filter(review => {
+        const authorUsername = review.users?.username || review.username;
+        return authorUsername && followingUsernames.includes(authorUsername);
+      });
     }
 
     setFilteredReviews(filtered);
