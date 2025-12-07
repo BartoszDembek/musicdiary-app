@@ -70,9 +70,6 @@ const FeaturedReviewsScreen = ({ navigation }) => {
   const loadFeaturedReviews = async () => {
     try {
       const data = await reviewService.getFeaturedReviews();
-      for(let i = 0; i < data.length; i++) {
-        console.log('Review comments for review', i, ':', data[i].review_comments);
-      }
       setReviews(data || []);
     } catch (error) {
       console.error('Error loading featured reviews:', error);
