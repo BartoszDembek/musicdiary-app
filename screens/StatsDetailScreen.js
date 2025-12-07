@@ -287,7 +287,6 @@ const StatsDetailScreen = () => {
         key={favorite.id} 
         style={styles.listItem}
         onPress={() => {
-          console.log('Favorite item pressed:', favorite);
           if (favorite.id) {
             if (favorite.type === 'album') {
               navigation.navigate('Album', { albumId: favorite.id });

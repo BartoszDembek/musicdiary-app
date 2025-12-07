@@ -16,6 +16,8 @@ import { useAuth } from '../context/AuthContext';
 import { reviewService } from '../services/reviewService';
 import { userService } from '../services/userService';
 import { colors } from '../theme/colors';
+import CommentsSection from '../components/CommentsSection';
+import VoteSection from '../components/VoteSection';
 
 const FeaturedReviewsScreen = ({ navigation }) => {
   const { user } = useAuth();
@@ -25,6 +27,7 @@ const FeaturedReviewsScreen = ({ navigation }) => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all' or 'following'
   const [followingList, setFollowingList] = useState([]);
+  const [expandedReviewIds, setExpandedReviewIds] = useState(new Set());
 
   useFocusEffect(
     useCallback(() => {
@@ -67,6 +70,9 @@ const FeaturedReviewsScreen = ({ navigation }) => {
   const loadFeaturedReviews = async () => {
     try {
       const data = await reviewService.getFeaturedReviews();
+      for(let i = 0; i < data.length; i++) {
+        console.log('Review comments for review', i, ':', data[i].review_comments);
+      }
       setReviews(data || []);
     } catch (error) {
       console.error('Error loading featured reviews:', error);
@@ -155,6 +161,18 @@ const FeaturedReviewsScreen = ({ navigation }) => {
     }
   };
 
+  const toggleComments = (reviewId) => {
+    setExpandedReviewIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(reviewId)) {
+        newSet.delete(reviewId);
+      } else {
+        newSet.add(reviewId);
+      }
+      return newSet;
+    });
+  };
+
   const renderReviewItem = ({ item }) => (
     <TouchableOpacity
       style={styles.reviewCard}
@@ -215,6 +233,27 @@ const FeaturedReviewsScreen = ({ navigation }) => {
           {item.created_at ? new Date(item.created_at).toLocaleDateString('pl-PL') : ''}
         </Text>
       </View>
+
+      <View style={styles.actionsContainer}>
+        <VoteSection reviewId={item._id || item.id} userId={user?.id} />
+        <TouchableOpacity 
+          style={styles.commentButton}
+          onPress={() => toggleComments(item._id || item.id)}
+        >
+          <Ionicons name="chatbubble-outline" size={20} color={colors.textSecondary} />
+          <Text style={styles.commentButtonText}>
+            {item.review_comments?.length || 0}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {expandedReviewIds.has(item._id || item.id) && (
+        <CommentsSection 
+          comments={item.review_comments || []} 
+          reviewId={item._id || item.id} 
+          userId={user?.id} 
+        />
+      )}
     </TouchableOpacity>
   );
 
@@ -461,6 +500,26 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+  actionsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 8,
+  },
+  commentButtonText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
 
