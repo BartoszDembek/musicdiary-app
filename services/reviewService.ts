@@ -52,7 +52,7 @@ export const reviewService = {
 
   getFeaturedReviews: async () => {
     try {
-      const response = await axios.get(`${API_URL}/reviews/featured`);
+      const response = await axios.get(`${API_URL}/review/featured`);
       return response.data;
     } catch (error) {
       console.error('Error getting featured reviews:', error);

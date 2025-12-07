@@ -80,8 +80,19 @@ const FeaturedReviewsScreen = ({ navigation }) => {
 
     let filtered = [];
     
+    // Helper to get review author ID
+    const getAuthorId = (review) => {
+      if (review.users && (review.users._id || review.users.id)) {
+        return review.users._id || review.users.id;
+      }
+      if (typeof review.userId === 'object' && review.userId) {
+        return review.userId._id || review.userId.id;
+      }
+      return review.userId;
+    };
+
     // First, filter out current user's reviews from all lists
-    const notMyReviews = reviews.filter(review => review.userId !== user.id);
+    const notMyReviews = reviews.filter(review => getAuthorId(review) !== user.id);
 
     if (activeTab === 'all') {
       filtered = notMyReviews;
@@ -93,7 +104,7 @@ const FeaturedReviewsScreen = ({ navigation }) => {
       const followingIds = followingList.map(f => (typeof f === 'object' ? f.userId : f));
       
       filtered = notMyReviews.filter(review => 
-        followingIds.includes(review.userId)
+        followingIds.includes(getAuthorId(review))
       );
     }
 
@@ -122,17 +133,22 @@ const FeaturedReviewsScreen = ({ navigation }) => {
   };
 
   const navigateToItem = (review) => {
-    if (review.albumId) {
-      navigation.navigate('Album', { albumId: review.albumId });
-    } else if (review.artistId) {
-      navigation.navigate('Artist', { artistId: review.artistId });
-    } else if (review.trackId) {
-      navigation.navigate('Track', { trackId: review.trackId });
-    } else if (review.spotifyId) {
-        // Fallback if specific ID fields aren't present but spotifyId is
-        if (review.type === 'album') navigation.navigate('Album', { albumId: review.spotifyId });
-        else if (review.type === 'artist') navigation.navigate('Artist', { artistId: review.spotifyId });
-        else if (review.type === 'track') navigation.navigate('Track', { trackId: review.spotifyId });
+    const itemType = review.types;
+    const itemId = review.spotify_id;
+
+    if (!itemId) return;
+
+    if (itemType === 'album') {
+      navigation.navigate('Album', { albumId: itemId });
+    }else if (itemType === 'song') {
+      navigation.navigate('Track', { trackId: itemId });
+    }
+  };
+
+  const navigateToUser = (review) => {
+    const userId = review.users?.id;
+    if (userId) {
+      navigation.navigate('UserProfile', { userId });
     }
   };
 
@@ -143,15 +159,19 @@ const FeaturedReviewsScreen = ({ navigation }) => {
     >
       <View style={styles.reviewHeader}>
         <View style={styles.itemInfo}>
-          {item.image && (
+          {item.image ? (
             <Image source={{ uri: item.image }} style={styles.itemImage} />
+          ) : (
+            <View style={[styles.itemImage, styles.itemImagePlaceholder]}>
+              <Ionicons name="musical-note" size={24} color={colors.primary} />
+            </View>
           )}
           <View style={styles.itemDetails}>
             <Text style={styles.itemName} numberOfLines={1}>
-              {item.itemName}
+              {item.item_name}
             </Text>
             <Text style={styles.itemArtist} numberOfLines={1}>
-              {item.artistName}
+              {item.artist_name}
             </Text>
             <Text style={styles.itemType}>
               {item.types === 'album' ? 'Album' : item.types === 'track' ? 'Track' : 'Artist'}
@@ -173,12 +193,23 @@ const FeaturedReviewsScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.reviewFooter}>
-        <View style={styles.userInfo}>
-          <Ionicons name="person-circle" size={20} color="#CDD6F4" />
-          <Text style={styles.username}>{item.username || 'User'}</Text>
-        </View>
+        <TouchableOpacity 
+          style={styles.userInfo}
+          onPress={() => navigateToUser(item)}
+        >
+          {item.users?.avatar ? (
+            <Image source={{ uri: item.users.avatar }} style={styles.userAvatar} />
+          ) : (
+            <View style={[styles.userAvatar, styles.userAvatarPlaceholder]}>
+              <Text style={styles.userAvatarText}>
+                {item.users?.username ? item.users.username.slice(0, 2).toUpperCase() : '??'}
+              </Text>
+            </View>
+          )}
+          <Text style={styles.username}>{item.users?.username || 'User'}</Text>
+        </TouchableOpacity>
         <Text style={styles.reviewDate}>
-          {item.createdAt ? new Date(item.createdAt).toLocaleDateString('pl-PL') : ''}
+          {item.created_at ? new Date(item.created_at).toLocaleDateString('pl-PL') : ''}
         </Text>
       </View>
     </TouchableOpacity>
@@ -326,6 +357,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginRight: 12,
   },
+  itemImagePlaceholder: {
+    backgroundColor: colors.primaryMedium,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   itemDetails: {
     flex: 1,
     justifyContent: 'center',
@@ -378,6 +414,21 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  userAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+  },
+  userAvatarPlaceholder: {
+    backgroundColor: colors.primaryMedium,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userAvatarText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: colors.primary,
   },
   username: {
     fontSize: 14,
