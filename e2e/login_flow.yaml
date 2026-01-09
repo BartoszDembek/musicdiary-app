@@ -1,0 +1,10 @@
+appId: com.sh8dr.musicdiaryapp
+---
+- launchApp
+- assertVisible: "Sign In"
+- tapOn: "Enter your email"
+- inputText: "test@example.com"
+- tapOn: "Enter your password"
+- inputText: "wrongpassword"
+- tapOn: "Sign In"
+- assertVisible: "Error"

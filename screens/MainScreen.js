@@ -47,7 +47,7 @@ const MainScreen = ({ navigation }) => {
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>MusicDiary</Text>
-        <Pressable onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
+        <Pressable testID="search-button" onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
           <Ionicons name="search" size={24} color={colors.primary} />
         </Pressable>
       </View>

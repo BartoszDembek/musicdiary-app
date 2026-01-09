@@ -1,0 +1,11 @@
+appId: com.sh8dr.musicdiaryapp
+---
+- launchApp
+# Assuming we are logged in or can skip login for this test if we use a specific build or state
+# But usually we need to login first.
+- runFlow: login_flow.yaml
+- assertVisible: "Home"
+- tapOn: "Reviews"
+- assertVisible: "Reviews"
+- tapOn: "Profile"
+- assertVisible: "Profile"

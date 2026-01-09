@@ -1,0 +1,17 @@
+appId: com.sh8dr.musicdiaryapp
+---
+- launchApp
+- assertVisible: "Sign In"
+- tapOn: "Sign Up"
+- assertVisible: "Create Account"
+- tapOn: "Enter your username"
+- inputText: "newuser"
+- tapOn: "Enter your email"
+- inputText: "newuser@example.com"
+- tapOn: "Enter your password"
+- inputText: "password123"
+- tapOn: "Confirm your password"
+- inputText: "password123"
+- tapOn: "Sign Up"
+# Depending on the flow, it might go to verification or login
+# - assertVisible: "Verify Email" 

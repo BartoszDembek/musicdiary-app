@@ -8,6 +8,7 @@ const RenderAlbumCard = ({ album, index }) => {
   return (
     <Pressable 
       key={index} 
+      testID={`album-card-${index}`}
       onPress={() => navigation.push('Album', { albumId: album.id })}
       style={styles.albumCard}
     >

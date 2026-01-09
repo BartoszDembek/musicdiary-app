@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, Pressable, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Pressable, Modal, Platform } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
@@ -85,6 +86,7 @@ const ProfileScreen = () => {
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Profile</Text>
           <Pressable 
+            testID="settings-button"
             style={styles.settingsButton}
             onPress={() => setIsSettingsVisible(true)}
           >
