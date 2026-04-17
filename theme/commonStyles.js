@@ -26,11 +26,12 @@ export const commonStyles = StyleSheet.create({
     padding: 20,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    backgroundColor: colors.card,
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: colors.foreground,
   },
   headerButtons: {
     flexDirection: 'row',
@@ -53,12 +54,12 @@ export const commonStyles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: colors.foreground,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 18,
-    color: colors.primary,
+    color: colors.secondaryLight,
     marginLeft: 20,
     marginTop: 10,
     marginBottom: 5,
@@ -72,7 +73,7 @@ export const commonStyles = StyleSheet.create({
   
   // Links
   link: {
-    color: colors.secondary,
+    color: colors.accent,
     textDecorationLine: 'underline',
   },
   
@@ -88,7 +89,7 @@ export const commonStyles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 16,
-    color: colors.secondary,
+    color: colors.mutedForeground,
     marginBottom: 8,
   },
   
@@ -101,7 +102,7 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 20,
   },
   primaryButtonText: {
-    color: colors.background,
+    color: colors.primaryForeground,
     fontSize: 18,
     fontWeight: '600',
   },
@@ -148,7 +149,7 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 15,
   },
   detailLabel: {
-    color: colors.secondary,
+    color: colors.secondaryLight,
     fontSize: 16,
     marginBottom: 5,
   },
@@ -195,7 +196,7 @@ export const commonStyles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
