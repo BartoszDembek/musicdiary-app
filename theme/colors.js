@@ -13,29 +13,31 @@ export const colors = {
   background: '#10002B',
   foreground: '#F7F5FF',
   card: 'rgba(36, 23, 70, 0.85)',
-  cardDark: '#1A0C39',
-  surface: '#1E0F42',
+  cardForeground: '#F7F5FF',
   popover: '#240046',
+  popoverForeground: '#F7F5FF',
+  surface: '#1E0F42',
+  cardDark: '#1A0C39',
 
   // Accent colors
   primary: '#9D4EDD',
-  primaryDark: '#7B2CBF',
+  primaryForeground: '#F7F5FF',
   primaryLight: 'rgba(157, 78, 221, 0.15)',
   primaryMedium: 'rgba(157, 78, 221, 0.28)',
-  primaryForeground: '#F7F5FF',
+  primaryDark: '#7B2CBF',
 
   secondary: '#3C096C',
+  secondaryForeground: '#F7F5FF',
   secondaryLight: '#5A189A',
   secondaryBg: 'rgba(92, 25, 154, 0.18)',
-  secondaryForeground: '#F7F5FF',
+
+  muted: '#4B3C78',
+  mutedForeground: '#BFB3FF',
 
   accent: '#C77DFF',
   accentForeground: '#210046',
   tertiary: '#F7768E',
   tertiaryLight: 'rgba(247, 118, 142, 0.18)',
-
-  muted: '#4B3C78',
-  mutedForeground: '#BFB3FF',
 
   destructive: '#FF5F6D',
   destructiveForeground: '#FFFFFF',
@@ -43,7 +45,7 @@ export const colors = {
   // Borders and input
   border: 'rgba(123, 44, 191, 0.45)',
   divider: 'rgba(123, 44, 191, 0.30)',
-  input: 'rgba(97, 43, 159, 0.30)',
+  input: 'rgba(97, 43, 159, 0.60)',
   inputBg: 'rgba(121, 53, 206, 0.14)',
   ring: '#C77DFF',
 
@@ -53,6 +55,10 @@ export const colors = {
   textMuted: '#B9A9E2',
   overlay: 'rgba(0, 0, 0, 0.65)',
   transparent: 'transparent',
+  skeleton: 'rgba(123, 44, 191, 0.18)',
+
+  // External icon colors
+  spotify: '#1DB954',
 
   // Visual tokens
   gradientHero: 'linear-gradient(135deg, #10002B 0%, #3C096C 45%, #7B2CBF 100%)',

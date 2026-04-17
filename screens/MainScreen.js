@@ -45,13 +45,23 @@ const MainScreen = ({ navigation }) => {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>MusicDiary</Text>
-        <Pressable testID="search-button" onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
-          <Ionicons name="search" size={24} color={colors.primary} />
-        </Pressable>
+      <View style={styles.headerWrapper}>
+        <View style={styles.headerInner}>
+          <Pressable style={styles.brandLink} onPress={() => {}}>
+            <View style={styles.brandBadge}>
+              <Ionicons name="musical-notes" size={20} color={colors.mauve} />
+            </View>
+            <Text style={styles.brandText}>
+              Music
+              <Text style={styles.brandTextGradient}>Diary</Text>
+            </Text>
+          </Pressable>
+          <Pressable testID="search-button" onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
+            <Ionicons name="search" size={24} color={colors.primary} />
+          </Pressable>
+        </View>
       </View>
-      
+
       <Text style={styles.subtitle}>New Releases</Text>
 
       <SearchModal 
@@ -127,6 +137,53 @@ const styles = StyleSheet.create({
     backgroundColor: colors.skeleton,
     borderRadius: 4,
     marginVertical: 4,
+  },
+  headerWrapper: {
+    backgroundColor: 'rgba(36, 23, 70, 0.75)',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    shadowColor: colors.mauve,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.13,
+    shadowRadius: 20,
+    elevation: 8,
+  },
+  headerInner: {
+    maxWidth: 960,
+    width: '100%',
+    alignSelf: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brandLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  brandBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: colors.mauve,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.22,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  brandText: {
+    fontFamily: 'System',
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.foreground,
+    marginLeft: 10,
+  },
+  brandTextGradient: {
+    color: colors.primary,
   },
 });
 
