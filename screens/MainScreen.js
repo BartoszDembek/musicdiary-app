@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spotifyService } from '../services/spotifyService';
 import RenderAlbumCard from '../components/RenderAlbumCard';
 import SearchModal from '../components/SearchModal';
+import GradientText from '../components/GradientText';
 import { colors, commonStyles } from '../theme';
 
 const MainScreen = ({ navigation }) => {  
@@ -51,10 +52,10 @@ const MainScreen = ({ navigation }) => {
             <View style={styles.brandBadge}>
               <Ionicons name="musical-notes" size={20} color={colors.mauve} />
             </View>
-            <Text style={styles.brandText}>
-              Music
-              <Text style={styles.brandTextGradient}>Diary</Text>
-            </Text>
+            <View style={styles.brandTitle}>
+              <Text style={styles.brandText}>Music</Text>
+              <GradientText style={[styles.brandText, styles.brandTextGradient]}>Diary</GradientText>
+            </View>
           </Pressable>
           <Pressable testID="search-button" onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
             <Ionicons name="search" size={24} color={colors.primary} />
@@ -184,6 +185,10 @@ const styles = StyleSheet.create({
   },
   brandTextGradient: {
     color: colors.primary,
+  },
+  brandTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
