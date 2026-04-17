@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Pressable, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import Disc3 from '../components/Disc3';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { spotifyService } from '../services/spotifyService';
 import RenderAlbumCard from '../components/RenderAlbumCard';
@@ -49,9 +51,14 @@ const MainScreen = ({ navigation }) => {
       <View style={styles.headerWrapper}>
         <View style={styles.headerInner}>
           <Pressable style={styles.brandLink} onPress={() => {}}>
-            <View style={styles.brandBadge}>
-              <Ionicons name="musical-notes" size={20} color={colors.mauve} />
-            </View>
+            <LinearGradient
+              colors={["#10002B", "#3C096C", "#7B2CBF"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.brandBadge}
+            >
+              <Disc3 size={20} color={colors.mauve} strokeWidth={1.5} />
+            </LinearGradient>
             <View style={styles.brandTitle}>
               <Text style={styles.brandText}>Music</Text>
               <GradientText style={[styles.brandText, styles.brandTextGradient]}>Diary</GradientText>
@@ -140,14 +147,16 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   headerWrapper: {
-    backgroundColor: 'rgba(36, 23, 70, 0.75)',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    backgroundColor: colors.glass,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(199, 125, 255, 0.22)',
     shadowColor: colors.mauve,
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.13,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 10,
+    overflow: 'hidden',
   },
   headerInner: {
     maxWidth: 960,
@@ -167,14 +176,13 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: colors.mauve,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.22,
-    shadowRadius: 20,
-    elevation: 10,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 24,
+    elevation: 12,
   },
   brandText: {
     fontFamily: 'System',
