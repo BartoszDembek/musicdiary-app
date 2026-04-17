@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     elevation: 12,
   },
   brandText: {
-    fontFamily: 'System',
+    fontFamily: 'Fraunces_700Bold',
     fontSize: 20,
     fontWeight: '700',
     color: colors.foreground,

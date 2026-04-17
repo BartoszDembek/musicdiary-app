@@ -29,8 +29,9 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.card,
   },
   headerTitle: {
+    fontFamily: 'Fraunces_700Bold',
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: colors.foreground,
   },
   headerButtons: {
@@ -52,12 +53,14 @@ export const commonStyles = StyleSheet.create({
   
   // Text styles
   title: {
+    fontFamily: 'Fraunces_700Bold',
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: colors.foreground,
     marginBottom: 8,
   },
   subtitle: {
+    fontFamily: 'Inter_500Medium',
     fontSize: 18,
     color: colors.secondaryLight,
     marginLeft: 20,
@@ -65,6 +68,7 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 5,
   },
   sectionTitle: {
+    fontFamily: 'Fraunces_600SemiBold',
     fontSize: 20,
     color: colors.primary,
     marginBottom: 15,
@@ -86,8 +90,10 @@ export const commonStyles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     color: colors.textPrimary,
+    fontFamily: 'Inter_400Regular',
   },
   inputLabel: {
+    fontFamily: 'Inter_500Medium',
     fontSize: 16,
     color: colors.mutedForeground,
     marginBottom: 8,
@@ -105,6 +111,7 @@ export const commonStyles = StyleSheet.create({
     color: colors.primaryForeground,
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   secondaryButton: {
     backgroundColor: colors.transparent,
@@ -119,6 +126,7 @@ export const commonStyles = StyleSheet.create({
     color: colors.primary,
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   
   // Stat items
