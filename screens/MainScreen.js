@@ -16,6 +16,9 @@ const MainScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const insets = useSafeAreaInsets();
+  const screenWidth = Dimensions.get('window').width;
+  const columnCount = screenWidth >= 1024 ? 4 : screenWidth >= 768 ? 3 : 2;
+  const cardWidth = (screenWidth - 32 - (columnCount - 1) * 16) / columnCount;
   
   const loadAlbums = async () => {
     setLoading(true);
@@ -70,7 +73,11 @@ const MainScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <Text style={styles.subtitle}>New Releases</Text>
+      <View style={styles.sectionHeader}>
+        <View>
+          <Text style={styles.sectionTitle}>New Releases</Text>
+        </View>
+      </View>
 
       <SearchModal 
         visible={isSearchVisible}
@@ -93,7 +100,12 @@ const MainScreen = ({ navigation }) => {
         ) : (
           <View style={styles.gridContainer}>
             {albums.map((album, index) => (
-              <RenderAlbumCard key={index} album={album} index={index} />
+              <RenderAlbumCard
+                key={album.id || index}
+                album={album}
+                index={index}
+                style={[styles.cardItem, { width: cardWidth }]}
+              />
             ))}
           </View>
         )}
@@ -122,7 +134,13 @@ const styles = StyleSheet.create({
     ...commonStyles.content
   },
   gridContainer: {
-    ...commonStyles.gridContainer
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+  },
+  cardItem: {
+    marginBottom: 20,
   },
   albumCard: {
     width: 115,
@@ -197,6 +215,20 @@ const styles = StyleSheet.create({
   brandTitle: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    marginBottom: 32,
+    gap: 16,
+    flexWrap: 'wrap',
+  },
+  sectionTitle: {
+    fontSize: 24,
+    lineHeight: 38,
+    fontWeight: '700',
+    color: colors.foreground,
   },
 });
 
