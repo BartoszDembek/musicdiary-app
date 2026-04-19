@@ -1,7 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, ActivityIndicator, View } from 'react-native';
+import { StyleSheet, ActivityIndicator, View, Text } from 'react-native';
 import { useFonts, Fraunces_400Regular, Fraunces_500Medium, Fraunces_600SemiBold, Fraunces_700Bold } from '@expo-google-fonts/fraunces';
 import { Inter_300Light, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+import { LinearGradient } from 'expo-linear-gradient';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import { NavigationContainer } from '@react-navigation/native';
@@ -46,9 +47,10 @@ function TabNavigator() {
     <Tab.Navigator 
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarStyle: styles.screen,
-        tabBarActiveTintColor: '#BB9AF7',
-        tabBarIcon: ({ color, size }) => {
+        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: '#E0AAFF',
+        tabBarInactiveTintColor: '#BFB3FF',
+        tabBarIcon: ({ color, size, focused }) => {
           let iconName;
           if (route.name === 'Home') {
             iconName = 'grid';
@@ -59,7 +61,11 @@ function TabNavigator() {
           } else {
             iconName = 'person';
           }
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return (
+            <View style={styles.iconWrap}>
+              <Ionicons name={iconName} size={22} color={color} />
+            </View>
+          );
         },
         tabBarShowLabel: false,
       })}
@@ -155,9 +161,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1E1E2E',
   },
-  screen: {
-    backgroundColor: '#1E1E2E',
-    borderTopColor: '#414868',
-    borderTopWidth: 1,
-  }
+  tabBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(36, 23, 70, 0.85)',
+    borderTopWidth: 0,
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    paddingBottom: 12,
+    paddingTop: 18,
+    paddingHorizontal: 8,
+    shadowColor: '#C77DFF',
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.45,
+    shadowRadius: 60,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(199, 125, 255, 0.22)',
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
 });
