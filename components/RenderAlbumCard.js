@@ -8,7 +8,7 @@ const RenderAlbumCard = ({ album, index, style }) => {
   const cover = album.cover || album.url;
   const title = album.title || album.name;
   const artistName = typeof album.artist === 'string' ? album.artist : album.artist?.name;
-  const genre = album.genre || 'Music';
+  const type = album.type || 'Music';
 
   return (
     <Pressable
@@ -26,7 +26,7 @@ const RenderAlbumCard = ({ album, index, style }) => {
           style={styles.overlay}
         />
         <View style={styles.genreBadge}>
-          <Text style={styles.genreText}>{genre.toUpperCase()}</Text>
+          <Text style={styles.genreText}>{type.toUpperCase()}</Text>
         </View>
       </View>
       <View style={styles.metaContainer}>
@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
   metaContainer: {
     paddingHorizontal: 4,
     paddingTop: 12,
+    paddingBottom: 16
   },
   title: {
     fontSize: 16,

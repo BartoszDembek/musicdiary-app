@@ -30,7 +30,8 @@ const MainScreen = ({ navigation }) => {
           id: element['id'], 
           url: element['images'][0]["url"],
           name: element['name'],
-          artist: element['artists'][0]['name']
+          artist: element['artists'][0]['name'],
+          type: element['type']
         });
       });
       setAlbums(img);
@@ -64,7 +65,7 @@ const MainScreen = ({ navigation }) => {
             </LinearGradient>
             <View style={styles.brandTitle}>
               <Text style={styles.brandText}>Music</Text>
-              <GradientText style={[styles.brandText, styles.brandTextGradient]}>Diary</GradientText>
+              <GradientText style={[styles.brandText, styles.brandTextGradient, styles.brandDiary]}>Diary</GradientText>
             </View>
           </Pressable>
           <Pressable testID="search-button" onPress={() => setIsSearchVisible(true)} style={styles.searchButton}>
@@ -205,6 +206,7 @@ const styles = StyleSheet.create({
   brandText: {
     fontFamily: 'Fraunces_700Bold',
     fontSize: 20,
+    lineHeight: 24,
     fontWeight: '700',
     color: colors.foreground,
     marginLeft: 10,
@@ -216,19 +218,31 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  brandDiary: {
+    marginLeft: 0,
+  },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     justifyContent: 'space-between',
-    marginBottom: 32,
+    marginBottom: 20,
     gap: 16,
     flexWrap: 'wrap',
+    paddingHorizontal: 16,
+    paddingTop: 24,
   },
   sectionTitle: {
+    fontFamily: 'Fraunces_700Bold',
     fontSize: 24,
     lineHeight: 38,
     fontWeight: '700',
     color: colors.foreground,
+  },
+  sectionDescription: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: colors.mutedForeground,
+    marginTop: 8,
   },
 });
 
