@@ -24,7 +24,7 @@ const AverageRating = ({ rating, count }) => {
           />
         ))}
       </View>
-      <Text style={styles.text}>{rating.toFixed(1)} ({count} reviews)</Text>
+      <Text style={styles.text}>({count})</Text>
     </View>
   );
 };
@@ -33,8 +33,7 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingBottom: 8,
+    gap: 4,
   },
   starsContainer: {
     flexDirection: 'row',

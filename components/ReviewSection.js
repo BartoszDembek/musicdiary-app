@@ -1,104 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 import { reviewService } from '../services/reviewService';
 import { userService } from '../services/userService';
 import { useAuth } from '../context/AuthContext';
 import ReviewModal from './ReviewModal';
 import CommentsSection from './CommentsSection';
-import VoteSection from './VoteSection';
+import AverageRating from './AverageRating';
+import { colors } from '../theme';
 
-const ReviewItem = ({ review, isUserReview, onEdit, showComments, onToggleComments, userId }) => {
-  const navigation = useNavigation();
-  
-  const handleAvatarPress = () => {
-    if (review.user_id === userId) {
-      // Navigate to user's own profile (tab navigator)
-      navigation.navigate('Profile');
-    } else {
-      // Navigate to other user's profile
-      navigation.navigate('UserProfile', { userId: review.user_id });
-    }
-  };
 
-  return (
-    <View style={[styles.reviewItem, isUserReview && styles.userReviewItem]}>
-      <View style={styles.reviewHeader}>
-        <View style={styles.userInfo}>
-          <Pressable 
-            style={styles.avatarContainer}
-            onPress={handleAvatarPress}
-          >
-            {review.users?.avatar && review.users.avatar !== "NULL" ? (
-              <Image
-                source={{ uri: review.users.avatar }}
-                style={styles.avatar}
-              />
-            ) : (
-              <Text style={styles.avatarText}>
-                {review.users?.username ? review.users.username[0].toUpperCase() : '?'}
-              </Text>
-            )}
-          </Pressable>
-          <View style={styles.userDetails}>
-            <Text style={styles.username}>{review.users?.username || 'Anonymous'}</Text>
-            <View style={styles.ratingDisplay}>
-              {[1, 2, 3, 4, 5].map((star) => (
-                <Ionicons
-                  key={star}
-                  name={star <= review.rating ? "star" : "star-outline"}
-                  size={14}
-                  color="#BB9AF7"
-                />
-              ))}
-            </View>
-          </View>
-        </View>
-        {isUserReview && (
-          <Pressable onPress={onEdit} style={styles.editButton}>
-            <Ionicons name="create" size={20} color="#7AA2F7" />
-          </Pressable>
-        )}
-      </View>
-      <Text style={styles.reviewText}>{review.text}</Text>
-
-      <View style={styles.reviewFooter}>
-        <Text style={styles.reviewDate}>
-          {new Date(review.created_at).toLocaleDateString()}
-        </Text>
-
-        <View style={styles.actionsContainer}>
-          <VoteSection reviewId={review.id} userId={userId} />
-
-          <Pressable
-            style={[styles.commentButton, showComments && styles.activeCommentButton]}
-            onPress={onToggleComments}
-          >
-            <Ionicons
-              name={showComments ? "chatbubble" : "chatbubble-outline"}
-              size={18}
-              color={showComments ? "#BB9AF7" : "#7AA2F7"}
-            />
-            <Text style={[styles.commentText, showComments && { color: "#BB9AF7" }]}>
-              {showComments ? "Close" : ""}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
-
-      {showComments && (
-        <CommentsSection 
-          comments={review.review_comments} 
-          reviewId={review.id}
-          userId={userId}
-        />
-      )}
-    </View>
-  );
-};
-
-const ReviewSection = ({ userId, itemId, type, artistName, itemName,image }) => {
+const ReviewSection = ({ userId, itemId, type, artistName, itemName, image, reviews, averageRating }) => {
   const [userReview, setUserReview] = useState(null);
   const [allReviews, setAllReviews] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -112,9 +24,9 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName,image }) => 
   }, [itemId]);
 
   const loadReviews = async () => {
-    const reviews = await reviewService.getReviewsBySpotifyId(itemId, type);
-    const userRev = reviews.find(r => r.user_id === userId);
-    const otherReviews = reviews.filter(r => r.user_id !== userId);
+    const reviewsData = await reviewService.getReviewsBySpotifyId(itemId, type);
+    const userRev = reviewsData.find(r => r.user_id === userId);
+    const otherReviews = reviewsData.filter(r => r.user_id !== userId);
 
     setUserReview(userRev);
     setAllReviews(otherReviews);
@@ -145,71 +57,120 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName,image }) => 
     setActiveReviewId(prev => prev === id ? null : id);
   };
 
-  const renderReviewList = () => {
-    let reviewsToList = [];
-    if (userReview) {
-      reviewsToList.push({ ...userReview, isUser: true });
-    }
-    reviewsToList = [...reviewsToList, ...allReviews.map(r => ({ ...r, isUser: false }))];
-
-    if (activeReviewId) {
-      const activeIndex = reviewsToList.findIndex(r => r.id === activeReviewId);
-      if (activeIndex > -1) {
-        const [active] = reviewsToList.splice(activeIndex, 1);
-        reviewsToList.unshift(active);
-      }
-    }
-
-    const activeReview = activeReviewId ? reviewsToList.find(r => r.id === activeReviewId) : null;
-    const restReviews = reviewsToList.filter(r => r.id !== activeReviewId);
-
-    return (
-      <>
-        {activeReview && (
-          <ReviewItem
-            review={activeReview}
-            isUserReview={activeReview.isUser}
-            onEdit={() => setIsModalVisible(true)}
-            showComments={true}
-            onToggleComments={() => toggleComments(activeReview.id)}
-            userId={userId}
-          />
-        )}
-
-        {!userReview && (
-          <Pressable
-            onPress={() => setIsModalVisible(true)}
-            style={[styles.addReviewButton, activeReview && { marginTop: 12 }]}
-          >
-            <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
-            <Text style={styles.addReviewText}>Add your review</Text>
-          </Pressable>
-        )}
-
-        {restReviews.map((item, index) => (
-          <View key={item.id}>
-            {(index > 0 || activeReview || !userReview) && <View style={styles.divider} />}
-            <ReviewItem
-              review={item}
-              isUserReview={item.isUser}
-              onEdit={() => setIsModalVisible(true)}
-              showComments={false}
-              onToggleComments={() => toggleComments(item.id)}
-              userId={userId}
-            />
-          </View>
-        ))}
-      </>
-    );
-  };
+  const allReviewsList = userReview ? [userReview, ...allReviews] : allReviews;
 
   return (
     <View style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.title}>Reviews</Text>
-        {renderReviewList()}
+      {/* Section Header */}
+      <View style={styles.sectionHeader}>
+        <View>
+          <Text style={styles.sectionTitle}>Reviews</Text>
+          <Text style={styles.sectionSubtitle}>
+            {allReviewsList.length} recenzji od społeczności
+          </Text>
+        </View>
+        {/* Rating Card */}
+        <View style={styles.ratingCard}>
+          <View style={styles.ratingContent}>
+            <View style={styles.ratingValueContainer}>
+              <Text style={styles.ratingValue}>{averageRating.toFixed(1)}</Text>
+            </View>
+            <View style={styles.ratingInfo}>
+              <AverageRating rating={averageRating} count={reviews.length} />
+            </View>
+          </View>
+        </View>
       </View>
 
+      {/* Reviews Grid */}
+      <View style={styles.reviewsGrid}>
+        {allReviewsList.length > 0 ? (
+          allReviewsList.map((review) => (
+            <View key={review.id} style={styles.reviewCard}>
+              {/* Review Header */}
+              <View style={styles.reviewCardHeader}>
+                <View style={styles.userInfo}>
+                  <View style={styles.avatarContainer}>
+                    {review.users?.avatar && review.users.avatar !== "NULL" ? (
+                      <Image
+                        source={{ uri: review.users.avatar }}
+                        style={styles.avatar}
+                      />
+                    ) : (
+                      <Text style={styles.avatarText}>
+                        {review.users?.username ? review.users.username[0].toUpperCase() : '?'}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.userDetails}>
+                    <Text style={styles.username}>{review.users?.username || 'Anonymous'}</Text>
+                    <Text style={styles.reviewDate}>
+                      {new Date(review.created_at).toLocaleDateString()}
+                    </Text>
+                  </View>
+                </View>
+                {/* Rating Stars */}
+                <View style={styles.ratingDisplay}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Ionicons
+                      key={star}
+                      name={star <= review.rating ? "star" : "star-outline"}
+                      size={14}
+                      color="#BB9AF7"
+                    />
+                  ))}
+                </View>
+              </View>
+
+              {/* Review Text */}
+              <Text style={styles.reviewText} numberOfLines={3}>{review.text}</Text>
+
+              {/* Review Footer */}
+              <View style={styles.reviewCardFooter}>
+                <Pressable 
+                  style={styles.commentButton}
+                  onPress={() => toggleComments(review.id)}
+                >
+                  <Ionicons name="chatbubble-outline" size={14} color="#7AA2F7" />
+                  <Text style={styles.commentButtonText}>
+                    {review.review_comments?.length || 0}
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* Comments Section */}
+              {activeReviewId === review.id && (
+                <CommentsSection 
+                  comments={review.review_comments} 
+                  reviewId={review.id}
+                  userId={userId}
+                />
+              )}
+            </View>
+          ))
+        ) : (
+          <Pressable
+            onPress={() => setIsModalVisible(true)}
+            style={styles.addReviewPrompt}
+          >
+            <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
+            <Text style={styles.addReviewText}>Dodaj pierwszą recenzję</Text>
+          </Pressable>
+        )}
+      </View>
+
+      {/* Add Review Button (if no user review) */}
+      {!userReview && (
+        <Pressable
+          onPress={() => setIsModalVisible(true)}
+          style={styles.addReviewButtonMain}
+        >
+          <Ionicons name="add-circle-outline" size={24} color="#7AA2F7" />
+          <Text style={styles.addReviewText}>Dodaj swoją recenzję</Text>
+        </Pressable>
+      )}
+
+      {/* Review Modal */}
       <ReviewModal
         visible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
@@ -225,51 +186,58 @@ const ReviewSection = ({ userId, itemId, type, artistName, itemName,image }) => 
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 25,
+    marginTop: 48,
+    marginBottom: 20,
   },
-  section: {
-    backgroundColor: 'rgba(187, 154, 247, 0.05)',
+  sectionHeader: {
+    marginBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: 20,
+  },
+  sectionTitle: {
+    fontSize: 28,
+    fontFamily: 'Fraunces_700Bold',
+    color: '#C0CAF5',
+    marginBottom: 4,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
+    color: '#565F89',
+    marginTop: 4,
+  },
+  reviewsGrid: {
+    gap: 12,
+  },
+  reviewCard: {
+    backgroundColor: 'rgba(36, 23, 70, 0.85)',
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
-    borderColor: 'rgba(187, 154, 247, 0.1)',
-    marginBottom: 16,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  title: {
-    fontSize: 20,
-    color: '#BB9AF7',
-    fontWeight: '600',
-    marginBottom: 16,
-  },
-  reviewItem: {
-    backgroundColor: '#2D2D44',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-  },
-  userReviewItem: {
-    borderColor: '#7AA2F7',
-    borderWidth: 1,
-  },
-  reviewHeader: {
+  reviewCardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    gap: 12,
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
     flex: 1,
   },
   avatarContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
+    backgroundColor: 'rgba(187, 154, 247, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden',
   },
   avatar: {
     width: 40,
@@ -283,75 +251,101 @@ const styles = StyleSheet.create({
   },
   userDetails: {
     flex: 1,
-    gap: 4,
+    gap: 2,
   },
   username: {
-    color: '#C0CAF5',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '600',
+    color: '#C0CAF5',
+  },
+  reviewDate: {
+    fontSize: 12,
+    color: '#565F89',
   },
   ratingDisplay: {
     flexDirection: 'row',
     gap: 2,
   },
   reviewText: {
+    fontSize: 14,
     color: '#C0CAF5',
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 8,
+    lineHeight: 20,
+    marginBottom: 12,
   },
-  reviewDate: {
-    color: '#565F89',
+  reviewCardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(187, 154, 247, 0.1)',
+  },
+  commentButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: 6,
+  },
+  commentButtonText: {
     fontSize: 12,
+    color: '#7AA2F7',
   },
-  addReviewButton: {
+  addReviewPrompt: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 32,
+    backgroundColor: 'rgba(122, 162, 247, 0.1)',
+    borderRadius: 16,
+    gap: 12,
+  },
+  addReviewButtonMain: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
-    backgroundColor: 'rgba(122, 162, 247, 0.1)',
+    backgroundColor: 'rgba(122, 162, 247, 0.15)',
     borderRadius: 12,
     gap: 8,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(122, 162, 247, 0.3)',
   },
   addReviewText: {
     color: '#7AA2F7',
     fontSize: 16,
     fontWeight: '500',
   },
-  editButton: {
-    padding: 4,
-  },
-  reviewFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(187, 154, 247, 0.1)',
-  },
-  actionsContainer: {
+  ratingCard: {
+    backgroundColor: 'rgba(36, 23, 70, 0.85)',
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'flex-start',
+    gap: 12,
+    minWidth: 140,
   },
-  commentButton: {
+  ratingContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    padding: 4,
+    gap: 8,
   },
-  commentText: {
-    color: '#7AA2F7',
-    fontSize: 14,
-    fontWeight: '500',
+  ratingValueContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
   },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(187, 154, 247, 0.1)',
-    marginVertical: 16,
+  ratingValue: {
+    fontSize: 20,
+    fontFamily: 'Fraunces_700Bold',
+    color: colors.primary,
   },
-
+  ratingInfo: {
+    gap: 2,
+  },
 });
 
 export default ReviewSection;

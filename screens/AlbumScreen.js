@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, Alert, ScrollView, TouchableOpacity, Pressable, Linking, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import Entypo from '@expo/vector-icons/Entypo';
 import { spotifyService } from '../services/spotifyService';
@@ -9,7 +10,6 @@ import { favoriteService } from '../services/favoriteService';
 import { userService } from '../services/userService';
 import ReviewSection from '../components/ReviewSection';
 import { useAuth } from '../context/AuthContext';
-import AverageRating from '../components/AverageRating';
 import { reviewService } from '../services/reviewService';
 import { colors, commonStyles } from '../theme';
 
@@ -113,62 +113,71 @@ const AlbumScreen = ({ route }) => {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Header with Back Button and Actions */}
           <View style={styles.header}>
-            <View style={styles.headerButtons}>
-              <Pressable onPress={() => navigation.goBack()} style={styles.iconButton}>
-                <Ionicons name="arrow-back" size={24} color={colors.primary} />
+            <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+              <Ionicons name="arrow-back" size={24} color={colors.primary} />
+            </Pressable>
+            <View style={styles.headerActions}>
+              <Pressable onPress={() => navigation.navigate('UserLists', { 
+                userId: user.id, 
+                mode: 'select',
+                itemToAdd: {
+                  spotify_id: albumId,
+                  item_name: album.name,
+                  type: 'album',
+                  artist_name: album.artists.map(a => a.name).join(', '),
+                  cover: album.images[0]?.url
+                }
+              })} style={styles.headerActionButton}>
+                <Ionicons name="list" size={24} color={colors.primary} />
               </Pressable>
-              <View style={styles.rightButtons}>
-                <Pressable onPress={() => navigation.navigate('UserLists', { 
-                  userId: user.id, 
-                  mode: 'select',
-                  itemToAdd: {
-                    spotify_id: albumId,
-                    item_name: album.name,
-                    type: 'album',
-                    artist_name: album.artists.map(a => a.name).join(', '),
-                    cover: album.images[0]?.url
-                  }
-                })} style={styles.iconButton}>
-                  <Ionicons name="list" size={24} color={colors.primary} />
-                </Pressable>
-                <Pressable onPress={handleFavorite} style={styles.iconButton}>
-                  <Ionicons 
-                    name={isFavorite ? "heart" : "heart-outline"} 
-                    size={24} 
-                    color={isFavorite ? colors.tertiary : colors.primary} 
-                  />
-                </Pressable>
-                <Pressable onPress={openInSpotify} style={styles.iconButton}>
-                  <Entypo name="spotify" size={24} color={colors.spotify} />
-                </Pressable>
-              </View>
+              <Pressable onPress={handleFavorite} style={styles.headerActionButton}>
+                <Ionicons 
+                  name={isFavorite ? "heart" : "heart-outline"} 
+                  size={24} 
+                  color={isFavorite ? colors.tertiary : colors.primary} 
+                />
+              </Pressable>
+              <Pressable onPress={openInSpotify} style={styles.headerActionButton}>
+                <Entypo name="spotify" size={24} color={colors.spotify} />
+              </Pressable>
             </View>
           </View>
 
-          <Image source={{ uri: album.images[0].url }} style={styles.albumImage} />
-          
-          <View style={styles.albumInfo}>
-            <Text style={styles.albumTitle}>{album.name}</Text>
-            <AverageRating rating={averageRating} count={reviews.length} />
-            <Pressable onPress={() => navigation.navigate('Artist', { artistId: album.artists[0].id })}>
-              <Text style={styles.artistName}>
-                {album.artists.map(artist => artist.name).join(', ')}
-              </Text>
-            </Pressable>
-
-            <View style={styles.statsContainer}>
-              <View style={styles.statItem}>
-                <Ionicons name="musical-notes" size={20} color={colors.primary} />
-                <Text style={styles.statText}>{album.total_tracks} tracks</Text>
+          {/* Main Content Container */}
+          <View style={styles.mainContainer}>
+            {/* Grid Layout: Album Image + Info */}
+            <View style={styles.gridContainer}>
+              {/* Album Image */}
+              <View style={styles.imageWrapper}>
+                <Image source={{ uri: album.images[0].url }} style={styles.albumImage} />
               </View>
-              <View style={styles.statItem}>
-                <Ionicons name="calendar" size={20} color={colors.primary} />
-                <Text style={styles.statText}>{album.release_date}</Text>
+
+              {/* Album Info */}
+              <View style={styles.albumInfoContainer}>
+                <Text style={styles.genreLabel}>
+                  Album · {album.genres[0] || 'Music'}
+                </Text>
+                <Text style={styles.albumTitle}>{album.name}</Text>
+                
+                <Pressable onPress={() => navigation.navigate('Artist', { artistId: album.artists[0].id })}>
+                  <Text style={styles.artistLink}>
+                    {album.artists.map(artist => artist.name).join(', ')}
+                  </Text>
+                </Pressable>
+
+                {/* Release Info */}
+                <View style={styles.metaContainer}>
+                  <Text style={styles.metaText}>{album.release_date}</Text>
+                  <Text style={styles.metaDot}>·</Text>
+                  <Text style={styles.metaText}>{album.total_tracks} utworów</Text>
+                </View>
               </View>
             </View>
 
-            <View style={styles.detailsContainer}>
+            {/* Album Details */}
+            <View style={styles.detailsSection}>
               <Text style={styles.sectionTitle}>Album Details</Text>
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Type</Text>
@@ -192,6 +201,7 @@ const AlbumScreen = ({ route }) => {
               </View>
             </View>
 
+            {/* Review Section */}
             <ReviewSection 
               userId={user?.id} 
               itemId={albumId} 
@@ -199,6 +209,8 @@ const AlbumScreen = ({ route }) => {
               artistName={album.artists.map(artist => artist.name).join(', ')}
               itemName={album.name}
               image={album.images[0]?.url}
+              reviews={reviews}
+              averageRating={averageRating}
             />
           </View>
         </ScrollView>
@@ -215,46 +227,98 @@ const styles = StyleSheet.create({
     ...commonStyles.content
   },
   header: {
-    padding: 20,
-  },
-  headerButtons: {
-    ...commonStyles.headerButtons
-  },
-  iconButton: {
-    ...commonStyles.iconButton
-  },
-  rightButtons: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
     flexDirection: 'row',
-    gap: 10,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerActionButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mainContainer: {
+    maxWidth: 1280,
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    gap: 32,
+    marginBottom: 48,
+    alignItems: 'flex-start',
+  },
+  imageWrapper: {
+    position: 'relative',
+    width: 160,
+    height: 160,
   },
   albumImage: {
     width: '100%',
-    height: 350,
-    marginBottom: 20,
+    height: '100%',
+    borderRadius: 24,
+    backgroundColor: colors.card,
+    shadowColor: 'rgba(187, 154, 247, 0.6)',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.8,
+    shadowRadius: 24,
+    elevation: 16,
   },
-  albumInfo: {
-    padding: 20,
+  albumInfoContainer: {
+    flex: 1,
+    justifyContent: 'flex-start',
+    minWidth: 0,
+  },
+  genreLabel: {
+    fontSize: 12,
+    color: colors.mauve || colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 1.5,
+    marginBottom: 8,
   },
   albumTitle: {
-    ...commonStyles.title
+    fontSize: 32,
+    fontFamily: 'Fraunces_700Bold',
+    color: colors.textPrimary,
+    marginBottom: 8,
+    lineHeight: 36,
   },
-  artistName: {
-    fontSize: 18,
-    color: colors.secondary,
-    marginBottom: 20,
+  artistLink: {
+    fontSize: 16,
+    color: colors.textPrimary,
+    marginBottom: 12,
     textDecorationLine: 'underline',
+    opacity: 0.9,
   },
-  statsContainer: {
-    ...commonStyles.statsContainer
+  metaContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 12,
   },
-  statItem: {
-    ...commonStyles.statItem
+  metaText: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
-  statText: {
-    ...commonStyles.statText
+  metaDot: {
+    color: colors.textSecondary,
   },
-  detailsContainer: {
-    ...commonStyles.detailsContainer
+  detailsSection: {
+    marginBottom: 48,
   },
   sectionTitle: {
     ...commonStyles.sectionTitle
