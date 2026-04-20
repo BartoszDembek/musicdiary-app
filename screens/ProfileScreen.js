@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, Pressable, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, ScrollView, Pressable, Modal, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../services/userService';
 import { colors, commonStyles } from '../theme';
@@ -19,7 +20,7 @@ const ProfileScreen = () => {
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
-    return `Joined: ${months[date.getMonth()]} ${date.getFullYear()}`;
+    return `Joined ${months[date.getMonth()]} ${date.getFullYear()}`;
   };
 
   const handleLogout = async () => {
@@ -79,19 +80,88 @@ const ProfileScreen = () => {
     navigation.navigate('StatsDetail', { type, data, title });
   };
 
+  const stats = [
+    { label: 'Reviews', value: getReviewsCount() },
+    { label: 'Followers', value: getFollowersCount() },
+    { label: 'Following', value: getFollowsCount() },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Profile</Text>
-          <Pressable 
-            testID="settings-button"
-            style={styles.settingsButton}
-            onPress={() => setIsSettingsVisible(true)}
-          >
-            <Ionicons name="settings-outline" size={24} color={colors.primary} />
-          </Pressable>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.mainContainer}>
+          {/* Glass Card */}
+          <View style={styles.glassCard}>
+            {/* Gradient Background */}
+            <LinearGradient
+              colors={['rgba(224, 170, 255, 0.6)', 'rgba(187, 178, 255, 0.4)', 'rgba(157, 77, 221, 0.3)']}
+              style={styles.gradientBackground}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            />
+
+            {/* Content */}
+            <View style={styles.cardContent}>
+              {/* Header with Avatar and Info */}
+              <View style={styles.headerRow}>
+                {/* Avatar */}
+                <LinearGradient
+                  colors={colors.gradientHero.split(', ')}
+                  style={styles.avatarContainer}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  {userProfile?.avatar && userProfile.avatar !== "NULL" ? (
+                    <Image 
+                      source={{ uri: userProfile.avatar }} 
+                      style={styles.avatarImage}
+                    />
+                  ) : (
+                    <Text style={styles.avatarText}>
+                      {userProfile?.username ? userProfile.username[0].toUpperCase() : '?'}
+                    </Text>
+                  )}
+                </LinearGradient>
+
+                {/* User Info */}
+                <View style={styles.userInfo}>
+                  <Text style={styles.userName} numberOfLines={1}>
+                    {userProfile?.username || 'Loading...'}
+                  </Text>
+                  <Text style={styles.userMeta}>
+                    {userProfile?.created_at ? formatJoinDate(userProfile.created_at) : 'Loading...'}
+                  </Text>
+                </View>
+
+                {/* Settings Button */}
+                <Pressable 
+                  testID="settings-button"
+                  style={styles.settingsButton}
+                  onPress={() => setIsSettingsVisible(true)}
+                >
+                  <Ionicons name="settings-outline" size={18} color={colors.primary} />
+                </Pressable>
+              </View>
+
+              {/* Stats Grid */}
+              <View style={styles.statsGrid}>
+                {stats.map((stat) => (
+                  <View key={stat.label} style={styles.statCard}>
+                    <Text style={styles.statValue}>{stat.value}</Text>
+                    <Text style={styles.statLabel}>{stat.label}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          </View>
+
+          {/* Recent Activity Section */}
+          <RecentActivity 
+            follows={userProfile?.follows}
+            reviews={userProfile?.reviews}
+            favorites={userProfile?.favorites}
+            review_comments={userProfile?.review_comments}
+          />
         </View>
 
         {/* Settings Modal */}
@@ -135,77 +205,6 @@ const ProfileScreen = () => {
             </View>
           </View>
         </Modal>
-
-        {/* User Info */}
-        <View style={styles.userInfoContainer}>
-          <View style={styles.avatarContainer}>
-            {userProfile?.avatar && userProfile.avatar !== "NULL" ? (
-              <Image 
-                source={{ uri: userProfile.avatar }} 
-                style={styles.avatarImage}
-              />
-            ) : (
-              <Text style={styles.avatarText}>
-                {userProfile?.username ? userProfile.username[0].toUpperCase() : '?'}
-              </Text>
-            )}
-          </View>
-          <Text style={styles.userName}>{userProfile?.username || 'Loading...'}</Text>
-          <Text style={styles.userEmail}>{userProfile?.email || 'Loading...'}</Text>
-          <Text style={styles.joinDate}>
-            {userProfile?.created_at ? formatJoinDate(userProfile.created_at) : 'Loading...'}
-          </Text>
-        </View>
-
-        {/* Stats */}
-        <View style={styles.statsContainer}>
-          <Pressable 
-            style={styles.statItem}
-            onPress={() => handleStatPress('reviews')}
-          >
-            <Text style={styles.statNumber}>{getReviewsCount()}</Text>
-            <Text style={styles.statLabel}>Reviews</Text>
-          </Pressable>
-          <Pressable 
-            style={styles.statItem}
-            onPress={() => handleStatPress('followers')}
-          >
-            <Text style={styles.statNumber}>{getFollowersCount()}</Text>
-            <Text style={styles.statLabel}>Followers</Text>
-          </Pressable>
-          <Pressable 
-            style={styles.statItem}
-            onPress={() => handleStatPress('following')}
-          >
-            <Text style={styles.statNumber}>{getFollowsCount()}</Text>
-            <Text style={styles.statLabel}>Following</Text>
-          </Pressable>
-          <Pressable 
-            style={styles.statItem}
-            onPress={() => handleStatPress('favorites')}
-          >
-            <Text style={styles.statNumber}>{getFavoritesCount()}</Text>
-            <Text style={styles.statLabel}>Favorites</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.actionButtonsContainer}>
-          <Pressable 
-            style={styles.actionButton}
-            onPress={() => navigation.navigate('UserLists', { userId: user?.id })}
-          >
-            <Ionicons name="list" size={24} color={colors.primary} />
-            <Text style={styles.actionButtonText}>My Lists</Text>
-          </Pressable>
-        </View>
-
-        {/* Recent Activity */}
-        <RecentActivity 
-          follows={userProfile?.follows}
-          reviews={userProfile?.reviews}
-          favorites={userProfile?.favorites}
-          review_comments={userProfile?.review_comments}
-        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -218,93 +217,123 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  header: {
-    ...commonStyles.header
+  contentContainer: {
+    paddingVertical: 40,
   },
-  headerTitle: {
-    ...commonStyles.headerTitle
+  mainContainer: {
+    maxWidth: 768, // max-w-3xl ≈ 768px
+    alignSelf: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
   },
-  settingsButton: {
-    padding: 8,
+  glassCard: {
+    backgroundColor: 'rgba(36, 23, 70, 0.85)', // glass effect
+    borderRadius: 24, // rounded-3xl
+    padding: 24, // p-6
+    overflow: 'hidden',
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  userInfoContainer: {
+  gradientBackground: {
+    position: 'absolute',
+    top: -96, // -top-24
+    right: -96, // -right-24
+    width: 288, // size-72 = 288px
+    height: 288,
+    borderRadius: 144, // circular
+    opacity: 0.6,
+  },
+  cardContent: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  headerRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    gap: 20, // gap-5
   },
   avatarContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.border,
+    width: 80, // size-20
+    height: 80,
+    borderRadius: 40, // rounded-full
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatarText: {
-    fontSize: 40,
-    color: colors.primary,
-    fontWeight: 'bold',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
   },
   avatarImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  avatarText: {
+    fontSize: 24, // text-2xl (zmniejszone z 30)
+    color: colors.mauve || colors.primary,
+    fontFamily: 'Fraunces_700Bold',
+  },
+  userInfo: {
+    flex: 1,
+    minWidth: 0, // min-w-0
   },
   userName: {
-    fontSize: 24,
+    fontSize: 24, // text-2xl (zmniejszone z 30)
     color: colors.textPrimary,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  userEmail: {
-    fontSize: 16,
-    color: colors.secondary,
+    fontFamily: 'Fraunces_700Bold',
     marginBottom: 4,
   },
-  joinDate: {
-    fontSize: 14,
-    color: colors.textSecondary,
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 20,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: colors.border,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    color: colors.primary,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 14,
+  userMeta: {
+    fontSize: 14, // text-sm
     color: colors.textSecondary,
     marginTop: 4,
   },
-  actionButtonsContainer: {
-    padding: 20,
-    paddingBottom: 0,
-  },
-  actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  settingsButton: {
+    width: 40, // size-10
+    height: 40,
+    borderRadius: 20, // rounded-full
+    backgroundColor: 'rgba(36, 23, 70, 0.6)', // glass
     justifyContent: 'center',
-    backgroundColor: colors.card,
-    padding: 15,
-    borderRadius: 12,
+    alignItems: 'center',
     borderWidth: 1,
-    borderColor: colors.border,
-    gap: 10,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  actionButtonText: {
-    color: colors.primary,
-    fontSize: 16,
-    fontWeight: '600',
+  bioText: {
+    marginTop: 24, // mt-6
+    fontSize: 14, // zmniejszone z 16
+    color: colors.textPrimary,
+    lineHeight: 20, // zmniejszony lineHeight
+    maxWidth: 384, // max-w-xl
+    opacity: 0.9,
+  },
+  statsGrid: {
+    marginTop: 28, // mt-7
+    flexDirection: 'row',
+    gap: 12, // gap-3
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: 'rgba(139, 92, 246, 0.4)', // bg-secondary/40
+    borderRadius: 16, // rounded-2xl
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)', // border-border/50
+    paddingHorizontal: 12, // px-3 (zmniejszone)
+    paddingVertical: 12, // py-3 (zmniejszone)
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 20, // zmniejszone z 24
+    color: colors.primary, // text-gradient - using primary for now
+    fontFamily: 'Fraunces_700Bold',
+    marginBottom: 4, // zmniejszony marginBottom
+  },
+  statLabel: {
+    fontSize: 10, // zmniejszone z 12
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5, // zmniejszony tracking
   },
   modalOverlay: {
     ...commonStyles.modalOverlay,

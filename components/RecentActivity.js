@@ -26,147 +26,90 @@ const RecentActivity = ({ follows, reviews, favorites, review_comments }) => {
     }
   };
 
-  const getRecentActivity = () => {
-    const activities = [];
-
-    // Add reviews
-    if (reviews && Array.isArray(reviews)) {
-      reviews.forEach(review => {
-        activities.push({
-          type: 'review',
-          data: review,
-          created_at: review.created_at,
-          title: `Reviewed ${review.item_name || 'an album'}`,
-          subtitle: review.artist_name || 'Unknown artist'
-        });
-      });
-    }
-
-    // Add follows
-    if (follows && follows[0] && Array.isArray(follows[0].follow)) {
-      follows[0].follow.forEach(follow => {
-        const isArtist = follow.artist_name;
-        const isUser = follow.user_name;
-        activities.push({
-          type: 'follow',
-          data: follow,
-          created_at: follow.createdAt,
-          title: `Following ${isArtist ? follow.artist_name : isUser ? follow.user_name : 'someone'}`,
-          subtitle: isArtist ? 'Artist' : isUser ? 'User' : 'Unknown'
-        });
-      });
-    }
-
-    // Add favorites
-    if (favorites && favorites[0] && Array.isArray(favorites[0].favorite)) {
-      favorites[0].favorite.forEach(favorite => {
-        activities.push({
-          type: 'favorite',
-          data: favorite,
-          created_at: favorite.createdAt,
-          title: `Added to favorites: ${favorite.item_name || 'item'}`,
-          subtitle: favorite.artist_name || 'Unknown artist'
-        });
-      });
-    }
-
-    // Add review comments
-    if (review_comments && Array.isArray(review_comments)) {
-      review_comments.forEach(comment => {
-        activities.push({
-          type: 'comment',
-          data: comment,
-          created_at: comment.created_at,
-          title: `Commented on a review`,
-        });
-      });
-    }
-
-    // Sort by created_at (newest first)
-    return activities
-      .filter(activity => activity.created_at)
+  const getRecentReviews = () => {
+    if (!reviews || !Array.isArray(reviews)) return [];
+    
+    return reviews
+      .filter(review => review.created_at)
       .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 5); // Show only latest 10 activities
+      .slice(0, 4)
+      .map(review => ({
+        id: review.id,
+        title: review.item_name || 'Unknown item',
+        subtitle: `Reviewed · ${formatDate(review.created_at)}`,
+        rating: review.rating || 5
+      }));
   };
 
-  const getIconName = (type) => {
-    switch (type) {
-      case 'review':
-        return 'document-text';
-      case 'follow':
-        return 'person-add';
-      case 'favorite':
-        return 'heart';
-      case 'comment':
-        return 'chatbubble';
-      default:
-        return 'star';
-    }
-  };
+  const recentReviews = getRecentReviews();
 
-  const recentActivities = getRecentActivity();
   return (
-    <View style={styles.activityContainer}>
+    <View style={styles.activitySection}>
       <Text style={styles.sectionTitle}>Recent Activity</Text>
-      {recentActivities.length > 0 ? (
-        recentActivities.map((activity, index) => (
-          <View key={`${activity.type}-${activity.data.id || index}`} style={styles.activityItem}>
-            <Ionicons 
-              name={getIconName(activity.type)} 
-              size={24} 
-              color={colors.primary} 
-            />
-            <View style={styles.activityContent}>
-              <Text style={styles.activityTitle}>
-                {activity.title}
-              </Text>
-              <Text style={styles.activitySubtitle}>
-                {activity.subtitle}
-              </Text>
-              <Text style={styles.activityDate}>
-                {formatDate(activity.created_at)}
-              </Text>
+      <View style={styles.activityList}>
+        {recentReviews.length > 0 ? (
+          recentReviews.map((review) => (
+            <View key={review.id} style={styles.activityItem}>
+              <View style={styles.activityContent}>
+                <Text style={styles.activityTitle} numberOfLines={1}>
+                  {review.title}
+                </Text>
+                <Text style={styles.activitySubtitle}>
+                  {review.subtitle}
+                </Text>
+              </View>
+              <Text style={styles.activityRating}>★ {review.rating}.0</Text>
             </View>
-          </View>
-        ))
-      ) : (
-        <Text style={styles.noActivityText}>No recent activity</Text>
-      )}
+          ))
+        ) : (
+          <Text style={styles.noActivityText}>No recent activity</Text>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  activityContainer: {
-    padding: 20,
+  activitySection: {
+    marginTop: 40, // mt-10
   },
   sectionTitle: {
-    ...commonStyles.sectionTitle
+    fontSize: 24, // zmniejszone z 28
+    color: colors.textPrimary,
+    fontFamily: 'Fraunces_700Bold',
+    marginBottom: 16, // mb-4
+  },
+  activityList: {
+    gap: 12, // space-y-3
   },
   activityItem: {
+    backgroundColor: 'rgba(36, 23, 70, 0.85)', // glass
+    borderRadius: 16, // rounded-2xl
+    paddingHorizontal: 16, // px-4
+    paddingVertical: 12, // py-3
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   activityContent: {
-    marginLeft: 12,
     flex: 1,
+    minWidth: 0, // min-w-0
   },
   activityTitle: {
     fontSize: 16,
     color: colors.textPrimary,
+    fontWeight: '500', // font-medium
     marginBottom: 2,
   },
   activitySubtitle: {
-    fontSize: 14,
+    fontSize: 12, // text-xs
     color: colors.textSecondary,
-    marginBottom: 2,
   },
-  activityDate: {
-    fontSize: 12,
-    color: colors.textSecondary,
+  activityRating: {
+    fontSize: 12, // text-xs
+    color: colors.mauve || colors.primary, // text-mauve
   },
   noActivityText: {
     fontSize: 16,
